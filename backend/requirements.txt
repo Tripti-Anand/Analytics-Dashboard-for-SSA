@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+httpx
+sunpy
+astropy
+pandas
+numpy
+scipy
+beautifulsoup4
+zeep
+drms
