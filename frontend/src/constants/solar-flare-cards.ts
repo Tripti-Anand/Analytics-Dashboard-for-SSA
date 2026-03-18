@@ -1,33 +1,31 @@
-import { ServiceCard } from "@/types/service-card";
+import { ServiceCard } from "@/types/service-card"
 
 export const SOLAR_FLARE_CARDS: ServiceCard[] = [
   {
     id: "01",
-    title: "AIA EUV IMAGES",
-    type: "options",
-    desc: "Select SDO AIA EUV wavelength channel",
-    options: ["94Å", "131Å", "171Å", "193Å", "211Å", "304Å", "335Å"],
-    color: "#522845",
-    border: "border-white/10",
-  },
-
-  {
-    id: "02",
-    title: "SOLAR MAGNETOGRAM",
+    title: "HMI Magnetogram",
     type: "image",
     imageSrc:
-      "https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIB.jpg",
-    desc: "Solar magnetic field map used to identify active regions.",
-    color: "#522845",
-    border: "border-white/10",
+      "https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg",
+    desc: "Magnetograms reveal solar magnetic field structures.",
+    color: "from-blue-500/20 via-indigo-500/20 to-purple-500/20",
+    border: "border-blue-400/20",
   },
-
+  {
+    id: "02",
+    title: "GOES X-ray Flux",
+    type: "chart",
+    desc: "GOES satellites measure solar X-ray flux used to classify flares.",
+    color: "from-orange-500/20 via-red-500/20 to-pink-500/20",
+    border: "border-red-400/20",
+  },
   {
     id: "03",
-    title: "GOES X-RAY FLUX",
-    type: "chart",
-    desc: "Real-time X-ray flux monitoring of solar flare intensity.",
-    color: "#522845",
-    border: "border-white/10",
+    title: "AIA EUV Viewer",
+    type: "options",
+    options: ["94Å", "131Å", "171Å", "193Å"],
+    desc: "AIA observes the Sun in extreme ultraviolet wavelengths.",
+    color: "from-purple-500/20 via-violet-500/20 to-fuchsia-500/20",
+    border: "border-purple-400/20",
   },
-];
+]
