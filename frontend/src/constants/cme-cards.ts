@@ -43,4 +43,13 @@ export const CME_CARDS: ServiceCard[] = [
     color: "from-red-500/20 via-orange-500/20 to-yellow-500/20",
     border: "border-red-400/20",
   },
+    // ─── NEW 5th card ───────────────────────────────────────────────────────
+  {
+    id: "05",
+    title: "CME Event Log",
+    type: "table",
+    desc: "Full log of the last 10 recorded CME events from NASA DONKI, including speed, trajectory, and Earth impact risk assessment.",
+    color: "from-slate-500/20 via-gray-500/20 to-zinc-500/20",
+    border: "border-slate-400/20",
+  },
 ];

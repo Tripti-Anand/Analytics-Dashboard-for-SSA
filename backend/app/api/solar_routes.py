@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import requests
-
+import httpx
+from fastapi.responses import StreamingResponse
 router = APIRouter()
 
 NASA_API_KEY = "DEMO_KEY"
@@ -28,3 +29,14 @@ def get_solar_flares():
 
     except Exception as e:
         return {"error": str(e)}
+
+
+@router.get("/aia-image")
+async def get_aia_image(wavelength: str = "0171"):
+    url = f"https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_{wavelength}.jpg"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, timeout=10.0)
+        return StreamingResponse(
+            response.aiter_bytes(),
+            media_type="image/jpeg"
+        )

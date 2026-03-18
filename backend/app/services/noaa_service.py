@@ -1,6 +1,6 @@
 import httpx
+import asyncio
 import pandas as pd
-from datetime import datetime
 
 class NOAAFetcher:
     """
@@ -11,33 +11,38 @@ class NOAAFetcher:
     GOES_URL_SECONDARY = "https://services.swpc.noaa.gov/json/goes/secondary/xrays-6-hour.json"
 
     @staticmethod
-    async def get_goes_xray_flux():
+    def _process(response) -> list:
         """
-        Fetches and merges GOES-16 and GOES-17 X-ray flux data.
-        Returns cleaned JSON for the frontend Plotly graph.
+        Cleans raw GOES JSON into a list of { time_tag, flux } dicts.
+        Returns empty list if fetch failed.
         """
-        async with httpx.AsyncClient() as client:
-            try:
-                # Try Primary Satellite (GOES-16)
-                response = await client.get(NOAAFetcher.GOES_URL_PRIMARY, timeout=5.0)
-                response.raise_for_status()
-                data = response.json()
-            except Exception as e:
-                print(f"Primary GOES failed: {e}. Trying Secondary...")
-                # Fallback to Secondary (GOES-17/18)
-                response = await client.get(NOAAFetcher.GOES_URL_SECONDARY, timeout=5.0)
-                data = response.json()
-
-        # Process with Pandas (cleaning data as per Professor's logic)
-        df = pd.DataFrame(data)
+        if isinstance(response, Exception):
+            print(f"GOES fetch failed: {response}")
+            return []
         
-        # Filter for 'Long' channel (0.1-0.8nm) used for Flare Class (A, B, C, M, X)
+        df = pd.DataFrame(response.json())
+        
         long_flux = df[
-            (df['energy'] == '0.1-0.8nm') & 
+            (df['energy'] == '0.1-0.8nm') &
             (df['observed_flux'] > 0)
         ].copy()
 
-        # Select only necessary columns for bandwidth efficiency
-        result = long_flux[['time_tag', 'flux']].tail(200) # Last 200 points (~3 hours)
-        
-        return result.to_dict(orient='records')
+        return long_flux[['time_tag', 'flux']].tail(200).to_dict(orient='records')
+
+    @staticmethod
+    async def get_goes_xray_flux():
+        """
+        Fetches GOES-16 (primary) and GOES-17 (secondary) simultaneously.
+        Returns both separately for dual-plot in frontend.
+        """
+        async with httpx.AsyncClient() as client:
+            primary_res, secondary_res = await asyncio.gather(
+                client.get(NOAAFetcher.GOES_URL_PRIMARY, timeout=5.0),
+                client.get(NOAAFetcher.GOES_URL_SECONDARY, timeout=5.0),
+                return_exceptions=True  # don't crash if one fails
+            )
+
+        return {
+            "primary": NOAAFetcher._process(primary_res),    # GOES-16
+            "secondary": NOAAFetcher._process(secondary_res) # GOES-17/18
+        }
