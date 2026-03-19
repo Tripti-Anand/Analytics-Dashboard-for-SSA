@@ -205,112 +205,112 @@ export function CMEImpactContent() {
 // ─── Card 04: Coronagraph Image ───────────────────────────────────────────────
 export function CMEImageContent() {
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
-      <div className="flex flex-col justify-center space-y-4">
+    <div className="flex items-center justify-between gap-12 w-full h-full">
+
+      {/* LEFT */}
+      <div className="flex flex-col justify-center max-w-xl space-y-4">
         <p className="text-lg text-zinc-300 leading-relaxed">
           LASCO coronagraph blocks the bright solar disk to reveal faint
           coronal structures and CMEs propagating outward.
         </p>
-        <p className="text-white/40 text-xs">Source: SOHO LASCO C2</p>
       </div>
 
-      <div className="flex items-center justify-center">
-        <img
-          src={getCMEImageUrl()}
-          alt="LASCO CME Coronagraph"
-          className="w-full max-w-[300px] aspect-square object-cover rounded-2xl shadow-xl border border-white/10"
-        />
-      </div>
+      {/* RIGHT */}
+      <div className="flex items-center justify-center flex-1 -mt-14">
+  <img
+    src={getCMEImageUrl()}
+    alt="LASCO CME Coronagraph"
+    className="w-[290px] h-[290px] object-cover rounded-2xl shadow-2xl"
+  />
+</div>
+
     </div>
   )
 }
 
 // ─── Card 05: CME Event Log (scrollable table) ────────────────────────────────
-export function CMEEventLog() {
-  const { events, loading } = useCMEData()
+  export function CMEEventLog() {
+    const { events, loading } = useCMEData()
 
-  return (
-    <div className="w-full h-full mt-6 flex flex-col">
+    return (
+      <div className="w-full h-full mt-6 flex flex-col overflow-hidden">
 
-      {/* header row */}
-      <div className="grid grid-cols-6 gap-2 px-3 pb-2 border-b border-white/10">
-        <span className="text-white/40 text-xs uppercase tracking-widest">ID</span>
-        <span className="text-white/40 text-xs uppercase tracking-widest">Time</span>
-        <span className="text-white/40 text-xs uppercase tracking-widest">Speed</span>
-        <span className="text-white/40 text-xs uppercase tracking-widest">Type</span>
-        <span className="text-white/40 text-xs uppercase tracking-widest">Location</span>
-        <span className="text-white/40 text-xs uppercase tracking-widest">Risk</span>
-      </div>
+        {/* header row */}
+        <div className="grid grid-cols-6 gap-2 px-3 pb-2 border-b border-white/10">
+          <span className="text-white/40 text-xs uppercase tracking-widest">ID</span>
+          <span className="text-white/40 text-xs uppercase tracking-widest">Time</span>
+          <span className="text-white/40 text-xs uppercase tracking-widest">Speed</span>
+          <span className="text-white/40 text-xs uppercase tracking-widest">Type</span>
+          <span className="text-white/40 text-xs uppercase tracking-widest">Location</span>
+          <span className="text-white/40 text-xs uppercase tracking-widest">Risk</span>
+        </div>
 
-      {/* scrollable rows */}
-      <div className="flex-1 overflow-y-auto space-y-1 mt-2 pr-1"
-        style={{ maxHeight: "calc(65vh - 160px)" }}
-      >
-        {loading && (
-          <p className="text-white/30 text-sm text-center mt-8">
-            Loading CME events...
-          </p>
-        )}
+        {/* scrollable rows */}
+        <div className="flex-1 overflow-y-auto space-y-1 mt-2 pr-2 pb-6 custom-scroll"
+          style={{ maxHeight: "calc(65vh - 160px)" }}
+        >
+          {loading && (
+            <p className="text-white/30 text-sm text-center mt-8">
+              Loading CME events...
+            </p>
+          )}
 
-        {!loading && events.length === 0 && (
-          <p className="text-white/30 text-sm text-center mt-8">
-            No CME events found.
-          </p>
-        )}
+          {!loading && events.length === 0 && (
+            <p className="text-white/30 text-sm text-center mt-8">
+              No CME events found.
+            </p>
+          )}
 
-        {events.map((cme, i) => (
-          <div
-            key={i}
-            className="grid grid-cols-6 gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition group"
-          >
-            {/* ID */}
-            <span className="text-white/50 text-xs truncate" title={cme.activityID}>
-              {cme.activityID?.split("-").slice(-2).join("-") ?? "—"}
-            </span>
-
-            {/* Time */}
-            <span className="text-white/60 text-xs">
-              {cme.startTime
-                ? new Date(cme.startTime).toLocaleDateString("en-US", {
-                    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
-                  })
-                : "—"}
-            </span>
-
-            {/* Speed */}
-            <span className="text-orange-300 text-xs font-medium">
-              {cme.speed ? `${cme.speed} km/s` : "N/A"}
-            </span>
-
-            {/* Type */}
-            <span className="text-white/60 text-xs">
-              {cme.type ?? "—"}
-            </span>
-
-            {/* Location */}
-            <span className="text-white/60 text-xs">
-              {cme.sourceLocation || "—"}
-            </span>
-
-            {/* Risk badge */}
-            <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit ${
-                cme.impactProbability === "High"
-                  ? "bg-red-500/20 text-red-300"
-                  : cme.impactProbability === "Moderate"
-                  ? "bg-yellow-500/20 text-yellow-300"
-                  : "bg-green-500/20 text-green-300"
-              }`}
+          {events.map((cme, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-6 gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition group"
             >
-              {cme.impactProbability ?? "Low"}
-            </span>
-          </div>
-        ))}
-      </div>
+              {/* ID */}
+              <span className="text-white/50 text-xs truncate" title={cme.activityID}>
+                {cme.activityID?.split("-").slice(-2).join("-") ?? "—"}
+              </span>
 
-      <p className="text-white/20 text-xs mt-3 text-right">
-        Source: NASA DONKI · Last 10 events
-      </p>
-    </div>
-  )
-}
+              {/* Time */}
+              <span className="text-white/60 text-xs">
+                {cme.startTime
+                  ? new Date(cme.startTime).toLocaleDateString("en-US", {
+                      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                    })
+                  : "—"}
+              </span>
+
+              {/* Speed */}
+              <span className="text-orange-300 text-xs font-medium">
+                {cme.speed ? `${cme.speed} km/s` : "N/A"}
+              </span>
+
+              {/* Type */}
+              <span className="text-white/60 text-xs">
+                {cme.type ?? "—"}
+              </span>
+
+              {/* Location */}
+              <span className="text-white/60 text-xs">
+                {cme.sourceLocation || "—"}
+              </span>
+
+              {/* Risk badge */}
+              <span
+                className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit ${
+                  cme.impactProbability === "High"
+                    ? "bg-red-500/20 text-red-300"
+                    : cme.impactProbability === "Moderate"
+                    ? "bg-yellow-500/20 text-yellow-300"
+                    : "bg-green-500/20 text-green-300"
+                }`}
+              >
+                {cme.impactProbability ?? "Low"}
+              </span>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    )
+  }

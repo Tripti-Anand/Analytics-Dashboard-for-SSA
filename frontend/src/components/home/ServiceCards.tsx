@@ -36,25 +36,35 @@ function MagnetogramContent() {
   }, [])
 
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
-      {/* LEFT: flare risk probabilities */}
-      <div className="flex flex-col justify-center space-y-4">
-        {loading && <p className="text-white/40 text-sm">Loading flare risk...</p>}
+    <div className="flex items-center justify-between gap-10 w-full h-full">
+
+      {/* LEFT SIDE */}
+      <div className="flex flex-col justify-center max-w-xl space-y-5">
+        {loading && (
+          <p className="text-white/40 text-sm">Loading flare risk...</p>
+        )}
+
         {risk && (
           <>
             <p className="text-zinc-300 text-lg leading-relaxed">
               Magnetograms reveal solar magnetic field structures.
             </p>
-            <div className="space-y-2 mt-2">
-              <p className="text-sm text-white/50 uppercase tracking-widest">Flare Probability</p>
-              <div className="flex gap-4">
-                <span className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm">
+
+            <div className="space-y-3">
+              <p className="text-xs text-white/50 uppercase tracking-widest">
+                Flare Probability
+              </p>
+
+              <div className="flex gap-3">
+                <span className="px-4 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm">
                   C: {risk.flare_probability.C_class}%
                 </span>
-                <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm">
+
+                <span className="px-4 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm">
                   M: {risk.flare_probability.M_class}%
                 </span>
-                <span className="px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">
+
+                <span className="px-4 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">
                   X: {risk.flare_probability.X_class}%
                 </span>
               </div>
@@ -63,14 +73,17 @@ function MagnetogramContent() {
         )}
       </div>
 
-      {/* RIGHT: live magnetogram image from your backend */}
-      <div className="flex items-center justify-center">
-        <img
-          src={getMagnetogramImageUrl()}
-          alt="HMI Magnetogram"
-          className="w-full max-w-[300px] aspect-square object-cover rounded-2xl shadow-xl border border-white/10"
-        />
-      </div>
+      {/* RIGHT SIDE IMAGE */}
+      <div className="flex items-center justify-end flex-1 pr-12 -mt-14">
+  <div className="-translate-y-3">
+    <img
+      src={getMagnetogramImageUrl()}
+      alt="HMI Magnetogram"
+      className="w-[290px] h-[290px] object-cover rounded-xl shadow-2xl"
+    />
+  </div>
+</div>
+
     </div>
   )
 }
@@ -123,9 +136,9 @@ function GoesFluxContent() {
       </div>
 
       {/* RIGHT: replace the static image with the live chart */}
-      <div className="flex items-center justify-center w-full">
-        <GOESFluxChart />
-      </div>
+      <div className="flex items-start justify-center w-full -mt-12">
+  <GOESFluxChart />
+</div>
     </div>
   )
 }
@@ -159,14 +172,16 @@ function AIAContent({ options }: { options: string[] }) {
       </div>
 
       {/* RIGHT — now uses your backend as proxy */}
-      <div className="flex items-center justify-center">
-        <img
-          key={selected}             // forces re-render on wavelength change
-          src={getAIAImageUrl(selected)}
-          alt={`AIA ${selected}`}
-          className="w-full max-w-[300px] aspect-square object-cover rounded-2xl shadow-xl border border-white/10"
-        />
-      </div>
+      <div className="flex items-start justify-center w-full -mt-16">
+  <div className="scale-95">
+    <img
+      key={selected}
+      src={getAIAImageUrl(selected)}
+      alt={`AIA ${selected}`}
+      className="w-[290px] h-[290px] object-cover rounded-xl shadow-2xl"
+    />
+  </div>
+</div>
     </div>
   )
 }
