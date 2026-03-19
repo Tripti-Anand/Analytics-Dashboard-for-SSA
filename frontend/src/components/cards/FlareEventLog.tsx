@@ -38,17 +38,33 @@ export default function FlareEventLog() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getSolarFlares()
-      .then((data) => setFlares(data.slice(-15).reverse())) // latest 15, newest first
-      .catch(console.error)
-      .finally(() => setLoading(false))
+    const fetchFlares = async () => {
+      try {
+        const data = await getSolarFlares()
+
+        // ✅ FIX: ensure it's always an array
+        const flaresArray = Array.isArray(data)
+          ? data
+          : data?.events || data?.data || []
+
+        // ✅ safe slicing
+        setFlares(flaresArray.slice(-16).reverse())
+      } catch (err) {
+        console.error("Flare fetch error:", err)
+        setFlares([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFlares()
   }, [])
 
   return (
-    <div className="w-full h-full mt-6 flex flex-col">
+    <div className="w-full h-full mt-6 flex flex-col overflow-hidden">
 
-      {/* header */}
-      <div className="grid grid-cols-5 gap-2 px-3 pb-2 border-b border-white/10">
+      {/* HEADER */}
+      <div className="sticky top-0 z-10 grid grid-cols-5 gap-2 px-3 pb-2 border-b border-white/10">
         <span className="text-white/40 text-xs uppercase tracking-widest">Class</span>
         <span className="text-white/40 text-xs uppercase tracking-widest">Start</span>
         <span className="text-white/40 text-xs uppercase tracking-widest">Peak</span>
@@ -56,11 +72,9 @@ export default function FlareEventLog() {
         <span className="text-white/40 text-xs uppercase tracking-widest">Region</span>
       </div>
 
-      {/* scrollable rows */}
-      <div
-        className="flex-1 overflow-y-auto space-y-1 mt-2 pr-1"
-        style={{ maxHeight: "calc(65vh - 160px)" }}
-      >
+      {/* CONTENT */}
+      <div className="flex-1 overflow-y-auto space-y-1 mt-2 pr-2 pb-6 custom-scroll">
+
         {loading && (
           <p className="text-white/30 text-sm text-center mt-8">
             Loading flare events...
@@ -75,32 +89,28 @@ export default function FlareEventLog() {
 
         {flares.map((flare, i) => {
           const { bg, text } = getClassColor(flare.classType)
+
           return (
             <div
               key={i}
               className="grid grid-cols-5 gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition"
             >
-              {/* Class badge */}
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit ${bg} ${text}`}>
                 {flare.classType ?? "—"}
               </span>
 
-              {/* Start time */}
               <span className="text-white/60 text-xs">
                 {formatTime(flare.startTime)}
               </span>
 
-              {/* Peak time */}
               <span className="text-white text-xs font-medium">
                 {formatTime(flare.peakTime)}
               </span>
 
-              {/* End time */}
               <span className="text-white/60 text-xs">
                 {formatTime(flare.endTime)}
               </span>
 
-              {/* Active region */}
               <span className="text-white/50 text-xs">
                 {flare.activeRegion ? `AR ${flare.activeRegion}` : "—"}
               </span>
@@ -108,10 +118,6 @@ export default function FlareEventLog() {
           )
         })}
       </div>
-
-      <p className="text-white/20 text-xs mt-3 text-right">
-        Source: NASA DONKI · Latest 15 flares
-      </p>
     </div>
   )
 }

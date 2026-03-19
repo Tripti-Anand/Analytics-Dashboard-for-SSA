@@ -19,3 +19,12 @@ canvas {
   z-index: -1;
   display: block;
 }
+
+.custom-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
