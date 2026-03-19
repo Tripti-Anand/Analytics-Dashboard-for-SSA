@@ -4,7 +4,7 @@ import httpx
 from fastapi.responses import StreamingResponse
 router = APIRouter()
 
-NASA_API_KEY = "DEMO_KEY"
+NASA_API_KEY = "8hyxjzgej9raSt2MDc8D14zTZCIILzw5oJrmFMe6"
 
 @router.get("/flares")
 def get_solar_flares():
