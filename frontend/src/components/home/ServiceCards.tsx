@@ -201,9 +201,7 @@ function CardContent({ card }: { card: ServiceCard }) {
   if (card.title === "CME Coronagraph Image") return <CMEImageContent />
   if (card.title === "CME Event Log") return <CMEEventLog />
 
-  // ─── DEFAULT FALLBACK ─────────────────────────────────────────────────────
-  // For SEP, Solar Wind, or any card without a specific component
-  // Shows desc on left, and image/options on right if they exist
+// ─── DEFAULT FALLBACK ─────────────────────────────────────────────────────
   return (
     <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
 
@@ -214,7 +212,7 @@ function CardContent({ card }: { card: ServiceCard }) {
         </p>
       </div>
 
-      {/* RIGHT: show image if exists, options if exists, empty otherwise */}
+      {/* RIGHT: informational rows for solar wind cards, image if available */}
       <div className="flex items-center justify-center w-full h-full">
 
         {card.type === "image" && card.imageSrc && (
@@ -225,34 +223,51 @@ function CardContent({ card }: { card: ServiceCard }) {
           />
         )}
 
-        {card.type === "options" && card.options && (
-          <div className="flex flex-wrap gap-3">
-            {card.options.map((o) => (
-              <button
-                key={o}
-                className="px-4 py-2 rounded-full border border-white/20 text-white/60 hover:bg-white/10 transition text-sm"
-              >
-                {o}
-              </button>
+        {card.title === "Solar Wind Speed" && (
+          <div className="flex flex-col gap-4 w-full">
+            {[
+              { label: "Typical Range", value: "300 – 800 km/s", color: "text-cyan-300" },
+              { label: "Slow Wind", value: "< 400 km/s", color: "text-green-300" },
+              { label: "Fast Wind", value: "> 600 km/s", color: "text-orange-300" },
+              { label: "Storm Threshold", value: "> 700 km/s", color: "text-red-300" },
+            ].map((row) => (
+              <div key={row.label} className="flex justify-between items-center border border-white/10 rounded-xl px-5 py-3 bg-white/5">
+                <span className="text-white/50 text-sm">{row.label}</span>
+                <span className={`${row.color} font-semibold`}>{row.value}</span>
+              </div>
             ))}
           </div>
         )}
 
-        {card.type === "chart" && (
-          <div className="flex flex-col items-center justify-center space-y-2 text-center">
-            <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <span className="text-white/30 text-2xl">~</span>
-            </div>
-            <p className="text-white/30 text-sm">Live data coming soon</p>
+        {card.title === "Plasma Density" && (
+          <div className="flex flex-col gap-4 w-full">
+            {[
+              { label: "Typical Range", value: "1 – 20 p/cm³", color: "text-cyan-300" },
+              { label: "Low Density", value: "< 5 p/cm³", color: "text-green-300" },
+              { label: "High Density", value: "> 10 p/cm³", color: "text-orange-300" },
+              { label: "Source", value: "NOAA SWPC", color: "text-blue-300" },
+            ].map((row) => (
+              <div key={row.label} className="flex justify-between items-center border border-white/10 rounded-xl px-5 py-3 bg-white/5">
+                <span className="text-white/50 text-sm">{row.label}</span>
+                <span className={`${row.color} font-semibold`}>{row.value}</span>
+              </div>
+            ))}
           </div>
         )}
 
-        {card.type === "text" && (
-          <div className="flex flex-col items-center justify-center space-y-2 text-center">
-            <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <span className="text-white/30 text-2xl">◎</span>
-            </div>
-            <p className="text-white/30 text-sm">Backend integration pending</p>
+        {card.title === "Interplanetary Magnetic Field" && (
+          <div className="flex flex-col gap-4 w-full">
+            {[
+              { label: "Bz Northward", value: "Quiet conditions", color: "text-green-300" },
+              { label: "Bz Southward", value: "Geomagnetic activity", color: "text-orange-300" },
+              { label: "Bz < −10 nT", value: "Storm likely", color: "text-red-300" },
+              { label: "Components", value: "Bx · By · Bz · Bt", color: "text-purple-300" },
+            ].map((row) => (
+              <div key={row.label} className="flex justify-between items-center border border-white/10 rounded-xl px-5 py-3 bg-white/5">
+                <span className="text-white/50 text-sm">{row.label}</span>
+                <span className={`${row.color} font-semibold`}>{row.value}</span>
+              </div>
+            ))}
           </div>
         )}
 
@@ -260,7 +275,6 @@ function CardContent({ card }: { card: ServiceCard }) {
     </div>
   )
 }
-
 // ─── Card wrapper (unchanged from your original) ─────────────────────────────
 function Card({
   card,
