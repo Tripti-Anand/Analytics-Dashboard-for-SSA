@@ -1,3 +1,4 @@
 node_modules/
 .next/
 venv/
+backend/app/assets/cme/
