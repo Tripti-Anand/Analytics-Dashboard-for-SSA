@@ -1,5 +1,5 @@
 // lib/api.ts
-const BASE_URL = "https://redesigned-fiesta-69g56p6r9pr5hx4v5-8000.app.github.dev"
+const BASE_URL = "http://127.0.0.1:8000"
 
 // --- Card 01: HMI Magnetogram ---
 export function getMagnetogramImageUrl(): string {

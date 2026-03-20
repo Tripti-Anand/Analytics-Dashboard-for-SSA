@@ -9,7 +9,7 @@ load_dotenv()
 
 router = APIRouter()
 
-NASA_API_KEY = os.getenv("NASA_API_KEY")
+NASA_API_KEY = "8ZMQhHDs5WkHqm761lOCn9x20SafyO52o3HDMbSR"
 
 
 @router.get("/flares")
