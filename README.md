@@ -25,9 +25,9 @@ A full-stack web application for monitoring real-time solar weather events inclu
 ```
 Analytics-Dashboard-for-SSA/
 ├── backend/
-│   ├── main.py                          # FastAPI app entry point
 │   ├── requirements.txt                 # Python dependencies
 │   └── app/
+│       ├── main.py                      # FastAPI app entry point
 │       ├── api/
 │       │   ├── solar_routes.py          # Solar flare, AIA proxy, Solar Wind + SEP endpoints
 │       │   ├── magnetogram_routes.py    # HMI magnetogram endpoints
@@ -117,7 +117,8 @@ cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn main:app --reload
+pip install "sunpy[all]"
+uvicorn app.main:app --reload
 ```
 
 **Mac / Linux**
@@ -126,7 +127,8 @@ cd backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-uvicorn main:app --reload
+pip install "sunpy[all]"
+uvicorn app.main:app --reload
 ```
 
 Backend runs at `http://localhost:8000`
@@ -162,6 +164,49 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 If you are running the backend on a different port or a remote server, update the URL in `frontend/.env.local` accordingly and restart the frontend dev server.
 
 ---
+
+## Running on GitHub Codespaces
+
+Codespaces gives you a full development environment in the browser — no local install needed.
+
+### 1. Open in Codespaces
+- Go to the GitHub repo
+- Click the green **"Code"** button
+- Click **"Codespaces"** tab
+- Click **"Create codespace on main"**
+
+### 2. Backend setup
+Once the codespace loads, open the terminal and run:
+```bash
+cd backend
+pip install -r requirements.txt
+pip install "sunpy[all]"
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+Codespaces will show a popup saying **"Port 8000 is available"** — click **"Open in Browser"** to confirm it's running. Then copy that forwarded URL (looks like `https://xxxx-8000.app.github.dev`).
+
+### 3. Update the frontend env variable
+```bash
+cd frontend
+echo "NEXT_PUBLIC_API_URL=https://xxxx-8000.app.github.dev" > .env.local
+```
+Replace `xxxx-8000.app.github.dev` with your actual forwarded URL from step 2.
+
+### 4. Frontend setup
+```bash
+cd frontend
+npm install
+npm run dev --hostname 0.0.0.0
+```
+Codespaces will show another popup for **Port 3000** — click **"Open in Browser"** to view the app.
+
+### Important — Port visibility
+By default Codespaces ports are **private**. If you get CORS or fetch errors:
+1. Go to the **"Ports"** tab in the bottom panel
+2. Right-click port **8000**
+3. Click **"Port Visibility"** → **"Public"**
+4. Do the same for port **3000**
+
 
 ## Backend Overview
 
