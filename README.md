@@ -110,11 +110,25 @@ cd Analytics-Dashboard-for-SSA
 ```
 
 ### 2. Backend setup
+
+**Windows**
 ```bash
 cd backend
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
+
+**Mac / Linux**
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
 Backend runs at `http://localhost:8000`
 
 ### 3. Frontend setup
@@ -125,11 +139,20 @@ npm run dev
 ```
 Frontend runs at `http://localhost:3000`
 
+> This is the same on Windows, Mac, and Linux.
+
 ### 4. Environment variables
-Create `frontend/.env.local`:
+
+**Windows** — create `frontend\.env.local`:
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
+
+**Mac / Linux** — create `frontend/.env.local`:
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+> The content is the same on all platforms, only the path separator differs (`\` on Windows, `/` on Mac/Linux).
 
 ### 5. Connect frontend to backend
 Open `frontend/src/lib/api.ts` and make sure the `BASE_URL` reads from the environment variable:
