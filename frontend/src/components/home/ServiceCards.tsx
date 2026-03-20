@@ -292,23 +292,20 @@ function Card({
   const scale = useTransform(progress, [start, end], [1, 0.9])
 
   return (
-    <div
-      className="h-screen sticky top-0 flex items-center justify-center"
-      style={{ backgroundColor: 'rgb(0,0,0)' }}
-    >
+    <div className="h-screen sticky top-0 flex items-center justify-center">
       <motion.div
         style={{
           scale,
           zIndex: total - index,
-          background: 'rgba(10, 10, 15, 0.95)',
         }}
         className={`
           relative w-[82%] h-[65vh] rounded-[2.5rem]
           border ${card.border} p-14 flex flex-col shadow-2xl
+          bg-[#0a0a0f]
         `}
       >
-        {/* gradient tint */}
-        <div className={`absolute inset-0 rounded-[2.5rem] bg-gradient-to-br ${card.color} opacity-60`} />
+        {/* gradient tint — reduce opacity to keep it subtle */}
+        <div className={`absolute inset-0 rounded-[2.5rem] bg-gradient-to-br ${card.color} opacity-40`} />
 
         {/* content */}
         <div className="relative z-10 flex flex-col h-full">
