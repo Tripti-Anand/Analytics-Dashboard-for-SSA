@@ -175,7 +175,15 @@ Codespaces gives you a full development environment in the browser — no local 
 - Click **"Codespaces"** tab
 - Click **"Create codespace on main"**
 
+Connect frontend to backend
+Open `frontend/src/lib/api.ts` and make sure the `BASE_URL` reads from the environment variable:
+```typescript
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+```
+If you are running the backend on a different port or a remote server, update the URL in `frontend/.env.local` accordingly and restart the frontend dev server.
+
 ### 2. Backend setup
+
 Once the codespace loads, open the terminal and run:
 ```bash
 cd backend
@@ -196,7 +204,7 @@ Replace `xxxx-8000.app.github.dev` with your actual forwarded URL from step 2.
 ```bash
 cd frontend
 npm install
-npm run dev --hostname 0.0.0.0
+npm run dev -- --hostname 0.0.0.0
 ```
 Codespaces will show another popup for **Port 3000** — click **"Open in Browser"** to view the app.
 
