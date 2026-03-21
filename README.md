@@ -103,6 +103,67 @@ Analytics-Dashboard-for-SSA/
 - Node.js 18+
 - Git
 
+## Running on GitHub Codespaces
+
+Codespaces gives you a full development environment in the browser — no local install needed.
+
+### 1. Open in Codespaces
+- Go to the GitHub repo
+- Click the green **"Code"** button
+- Click **"Codespaces"** tab
+- Click **"Create codespace on main"**
+
+### 2. Connect frontend to backend
+Open `frontend/src/lib/api.ts` and make sure the `BASE_URL` reads from the environment variable:
+```typescript
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+```
+If you are running the backend on a different port or a remote server, update the URL in `frontend/.env.local` accordingly and restart the frontend dev server.
+
+### 3. Backend setup
+
+Once the codespace loads, open the terminal and run:
+```bash
+cd backend
+pip install -r requirements.txt
+pip install "sunpy[all]"
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+> If the above command doesn’t work, you can try:
+```bash
+uvicorn app.main:app --reload
+```
+Codespaces will show a popup saying **"Port 8000 is available"** — click **"Open in Browser"** to confirm it's running. Then copy that forwarded URL (looks like `https://xxxx-8000.app.github.dev`).
+
+### 4. Update the frontend env variable
+```bash
+cd frontend
+echo "NEXT_PUBLIC_API_URL=https://xxxx-8000.app.github.dev" > .env.local
+```
+Replace `xxxx-8000.app.github.dev` with your actual forwarded URL from step 2.
+
+### 5. Frontend setup
+```bash
+cd frontend
+npm install
+npm run dev -- --hostname 0.0.0.0
+```
+> If the above command doesn’t work, you can try:
+```bash
+npm run dev
+```
+Codespaces will show another popup for **Port 3000** — click **"Open in Browser"** to view the app.
+
+### Important — Port visibility
+By default Codespaces ports are **private**. If you get CORS or fetch errors:
+1. Go to the **"Ports"** tab in the bottom panel
+2. Right-click port **8000**
+3. Click **"Port Visibility"** → **"Public"**
+4. Do the same for port **3000**
+
+###  For running locally on your pc
+
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/Tripti-Anand/Analytics-Dashboard-for-SSA.git
@@ -164,66 +225,6 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 If you are running the backend on a different port or a remote server, update the URL in `frontend/.env.local` accordingly and restart the frontend dev server.
 
 ---
-
-## Running on GitHub Codespaces
-
-Codespaces gives you a full development environment in the browser — no local install needed.
-
-### 1. Open in Codespaces
-- Go to the GitHub repo
-- Click the green **"Code"** button
-- Click **"Codespaces"** tab
-- Click **"Create codespace on main"**
-
-### 2. Connect frontend to backend
-Open `frontend/src/lib/api.ts` and make sure the `BASE_URL` reads from the environment variable:
-```typescript
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-```
-If you are running the backend on a different port or a remote server, update the URL in `frontend/.env.local` accordingly and restart the frontend dev server.
-
-### 3. Backend setup
-
-Once the codespace loads, open the terminal and run:
-```bash
-cd backend
-pip install -r requirements.txt
-pip install "sunpy[all]"
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-> If the above command doesn’t work, you can try:
-```bash
-uvicorn app.main:app --reload
-```
-Codespaces will show a popup saying **"Port 8000 is available"** — click **"Open in Browser"** to confirm it's running. Then copy that forwarded URL (looks like `https://xxxx-8000.app.github.dev`).
-
-### 4. Update the frontend env variable
-```bash
-cd frontend
-echo "NEXT_PUBLIC_API_URL=https://xxxx-8000.app.github.dev" > .env.local
-```
-Replace `xxxx-8000.app.github.dev` with your actual forwarded URL from step 2.
-
-### 5. Frontend setup
-```bash
-cd frontend
-npm install
-npm run dev -- --hostname 0.0.0.0
-```
-> If the above command doesn’t work, you can try:
-```bash
-npm run dev
-```
-Codespaces will show another popup for **Port 3000** — click **"Open in Browser"** to view the app.
-
-### Important — Port visibility
-By default Codespaces ports are **private**. If you get CORS or fetch errors:
-1. Go to the **"Ports"** tab in the bottom panel
-2. Right-click port **8000**
-3. Click **"Port Visibility"** → **"Public"**
-4. Do the same for port **3000**
-
 
 ## Backend Overview
 
