@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from sunpy.map import Map
 import astropy.units as u
+from scipy.ndimage import label, find_objects
 
 class SunPyProcessor:
     """
@@ -109,20 +110,70 @@ class SunPyProcessor:
             "gradient_strength": round(gradient_strength, 2),
             "polarity_mix": round(polarity_mix, 3)
         }    
-    
-    def compute_flare_probability(self, features):
 
-        score = (
-            features["mean_field"] * 0.3 +
-            features["gradient_strength"] * 0.5 +
-            features["polarity_mix"] * 50
-        )
+    def calculate_flare_probability(self, strength, area):
+        """
+        Simple heuristic model for flare probability
+        """
 
-        # Normalize score
-        score = min(score / 50, 1)
+        # Normalize values
+        strength_factor = min(strength / 150, 1)   # 0 → 1
+        area_factor = min(area / 2000, 1)          # 0 → 1
 
-        return {
-            "C_class": round(score * 70, 1),
-            "M_class": round(score * 25, 1),
-            "X_class": round(score * 5, 1)
-        }
+        score = (0.7 * strength_factor) + (0.3 * area_factor)
+
+        if score > 0.75:
+            return {"C": 40, "M": 40, "X": 20}
+        elif score > 0.38:
+            return {"C": 60, "M": 30, "X": 10}
+        else:
+            return {"C": 80, "M": 15, "X": 5}
+        
+    def detect_active_regions(self, data):
+
+        arr = np.array(data)
+
+        # Balanced threshold
+        threshold = 100
+        mask = np.abs(arr) > threshold
+
+        labeled, num = label(mask)
+        objects = find_objects(labeled)
+
+        regions = []
+
+        for obj in objects:
+
+            if obj is None:
+                continue
+
+            y_slice, x_slice = obj
+
+            x1 = x_slice.start
+            x2 = x_slice.stop
+            y1 = y_slice.start
+            y2 = y_slice.stop
+
+            width = x2 - x1
+            height = y2 - y1
+            area = width * height
+
+            # Balanced filtering
+            if area < 80:
+                continue
+
+            region = arr[y1:y2, x1:x2]
+
+            mean_strength = float(np.mean(np.abs(region)))
+
+            flare_prob = self.calculate_flare_probability(mean_strength, area)
+
+            regions.append({
+                "id": len(regions) + 1,
+                "bbox": [x1, y1, x2, y2],
+                "strength": round(mean_strength, 2),
+                "area": area,
+                "flare": flare_prob
+            })
+
+        return regions        
