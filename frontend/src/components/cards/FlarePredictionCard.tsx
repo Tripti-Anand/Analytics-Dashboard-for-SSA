@@ -154,7 +154,7 @@ export default function FlarePredictionCard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/solar/ai/flare-predict", {
+      const res = await fetch("/api/flare-predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ use_live_data: true, include_explanation: true }),
