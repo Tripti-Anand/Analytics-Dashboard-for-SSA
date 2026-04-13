@@ -113,21 +113,25 @@ class SunPyProcessor:
 
     def calculate_flare_probability(self, strength, area):
         """
-        Simple heuristic model for flare probability
+        Continuous heuristic model for flare probability.
+        Returns A, B, C, M, X class probabilities.
         """
+        strength_factor = min(strength / 150, 1.0)
+        area_factor = min(area / 3000, 1.0)
+        score = (0.6 * strength_factor) + (0.4 * area_factor)
 
-        # Normalize values
-        strength_factor = min(strength / 150, 1)   # 0 → 1
-        area_factor = min(area / 2000, 1)          # 0 → 1
-
-        score = (0.7 * strength_factor) + (0.3 * area_factor)
-
-        if score > 0.75:
-            return {"C": 40, "M": 40, "X": 20}
-        elif score > 0.38:
-            return {"C": 60, "M": 30, "X": 10}
+        if score > 0.80:
+            return {"A": 2,  "B": 5,  "C": 18, "M": 45, "X": 30}
+        elif score > 0.65:
+            return {"A": 5,  "B": 10, "C": 30, "M": 40, "X": 15}
+        elif score > 0.50:
+            return {"A": 8,  "B": 15, "C": 42, "M": 28, "X": 7}
+        elif score > 0.35:
+            return {"A": 12, "B": 22, "C": 45, "M": 18, "X": 3}
+        elif score > 0.20:
+            return {"A": 20, "B": 35, "C": 35, "M": 9,  "X": 1}
         else:
-            return {"C": 80, "M": 15, "X": 5}
+            return {"A": 40, "B": 40, "C": 16, "M": 3,  "X": 1}
         
     def detect_active_regions(self, data):
 
