@@ -78,7 +78,6 @@ def get_magnetogram_image():
         plt.figure(figsize=(7, 7), facecolor='black')
 
         plt.imshow(processed, cmap="gray")
-        plt.title("SDO/HMI Magnetogram", color="white")
         plt.axis("off")
 
         plt.savefig(image_path, bbox_inches="tight", facecolor='black')

@@ -138,7 +138,7 @@ class SunPyProcessor:
         arr = np.array(data)
 
         # Balanced threshold
-        threshold = 100
+        threshold = 60
         mask = np.abs(arr) > threshold
 
         labeled, num = label(mask)
@@ -163,12 +163,15 @@ class SunPyProcessor:
             area = width * height
 
             # Balanced filtering
-            if area < 80:
+            if area < 100:
                 continue
 
             region = arr[y1:y2, x1:x2]
 
             mean_strength = float(np.mean(np.abs(region)))
+
+            if mean_strength < 50:
+                continue
 
             flare_prob = self.calculate_flare_probability(mean_strength, area)
 
@@ -180,4 +183,9 @@ class SunPyProcessor:
                 "flare": flare_prob
             })
 
-        return regions        
+        regions.sort(key=lambda r: r["strength"], reverse=True)
+
+        for i, r in enumerate(regions):
+            r["id"]=i+1;    
+
+        return regions[:8]        
