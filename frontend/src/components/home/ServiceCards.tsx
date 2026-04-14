@@ -1,9 +1,10 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef, useEffect, useState } from "react"
 import { ServiceCard } from "@/types/service-card"
-import { getFlareRisk, getGoesXrayFlux, getMagnetogramImageUrl, getAIAImageUrl } from "@/lib/api"
+import { getGoesXrayFlux, getAIAImageUrl } from "@/lib/api"
 import GOESFluxChart from "@/components/cards/GOESFluxChart"
 import {
   CMEVelocityContent,
@@ -13,6 +14,34 @@ import {
   CMEEventLog,
 } from "@/components/cards/CMECards"
 import FlareEventLog from "@/components/cards/FlareEventLog"
+
+const InteractiveMagnetogram = dynamic(
+  () => import("@/components/cards/InteractiveMagnetogram"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+        <div className="flex flex-col justify-center space-y-4">
+          <p className="text-zinc-300 text-base leading-relaxed">
+            Magnetograms reveal solar magnetic field structures.
+            Hover over the image to inspect field values.
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+          <div style={{
+            width: "280px", height: "280px", borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.05)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0
+          }}>
+            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "14px" }}>Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+)
 
 // AIA wavelength → NASA image URL mapping
 // REPLACE the AIA_URLS map with this
@@ -25,67 +54,7 @@ const AIA_URLS: Record<string, string> = {
 
 // ─── Card 01: Magnetogram ────────────────────────────────────────────────────
 function MagnetogramContent() {
-  const [risk, setRisk] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    getFlareRisk()
-      .then(setRisk)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
-
-  return (
-    <div className="flex items-center justify-between gap-10 w-full h-full">
-
-      {/* LEFT SIDE */}
-      <div className="flex flex-col justify-center max-w-xl space-y-5">
-        {loading && (
-          <p className="text-white/40 text-sm">Loading flare risk...</p>
-        )}
-
-        {risk && (
-          <>
-            <p className="text-zinc-300 text-lg leading-relaxed">
-              Magnetograms reveal solar magnetic field structures.
-            </p>
-
-            <div className="space-y-3">
-              <p className="text-xs text-white/50 uppercase tracking-widest">
-                Flare Probability
-              </p>
-
-              <div className="flex gap-3">
-                <span className="px-4 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm">
-                  C: {risk.flare_probability.C_class}%
-                </span>
-
-                <span className="px-4 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm">
-                  M: {risk.flare_probability.M_class}%
-                </span>
-
-                <span className="px-4 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">
-                  X: {risk.flare_probability.X_class}%
-                </span>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* RIGHT SIDE IMAGE */}
-      <div className="flex items-center justify-end flex-1 pr-12 -mt-14">
-  <div className="-translate-y-3">
-    <img
-      src={getMagnetogramImageUrl()}
-      alt="HMI Magnetogram"
-      className="w-[290px] h-[290px] object-cover rounded-xl shadow-2xl"
-    />
-  </div>
-</div>
-
-    </div>
-  )
+  return <InteractiveMagnetogram />
 }
 
 // ─── Card 02: GOES X-ray Flux ────────────────────────────────────────────────

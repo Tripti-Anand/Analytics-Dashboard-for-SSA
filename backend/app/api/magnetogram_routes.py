@@ -78,7 +78,6 @@ def get_magnetogram_image():
         plt.figure(figsize=(7, 7), facecolor='black')
 
         plt.imshow(processed, cmap="gray")
-        plt.title("SDO/HMI Magnetogram", color="white")
         plt.axis("off")
 
         plt.savefig(image_path, bbox_inches="tight", facecolor='black')
@@ -89,22 +88,22 @@ def get_magnetogram_image():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@router.get("/magnetogram/flare-risk")
-def get_flare_risk():
+
+@router.get("/magnetogram/regions")
+def get_active_regions():
 
     try:
+
         result = processor.get_latest_magnetogram()
 
         data = result["data"]
 
-        features = processor.analyze_magnetogram(data)
-
-        flare_prob = processor.compute_flare_probability(features)
+        regions = processor.detect_active_regions(data)
 
         return {
             "status": "success",
-            "features": features,
-            "flare_probability": flare_prob
+            "total_regions": len(regions),
+            "regions": regions
         }
 
     except Exception as e:
