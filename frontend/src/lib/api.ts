@@ -7,12 +7,6 @@ export function getMagnetogramImageUrl(): string {
   return `${BASE_URL}/space-weather/magnetogram/image`
 }
 
-export async function getFlareRisk() {
-  const res = await fetch(`${BASE_URL}/space-weather/magnetogram/flare-risk`)
-  if (!res.ok) throw new Error("Flare risk fetch failed")
-  return res.json()
-  // Returns: { features: {...}, flare_probability: { C_class, M_class, X_class } }
-}
 
 // --- Card 02: GOES X-ray Flux ---
 export async function getGoesXrayFlux() {
