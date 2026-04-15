@@ -134,7 +134,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```bash
 uvicorn app.main:app --reload
 ```
-Codespaces will show a popup saying **"Port 8000 is available"** — click **"Open in Browser"** to confirm it's running. Then copy that forwarded URL (looks like `https://xxxx-8000.app.github.dev`).
+Codespaces will show a popup saying **"Port 8000 is available"** — click **"Open in Browser"** to confirm it's running. Then copy that forwarded URL (looks like `https://xxxx-8000.app.github.dev`).( Make sure the port is public. You can go to the Ports tab besides the terminal and make them public manually too. For more detail check below. )
 
 ### 4. Update the frontend env variable
 ```bash
@@ -161,6 +161,8 @@ By default Codespaces ports are **private**. If you get CORS or fetch errors:
 2. Right-click port **8000**
 3. Click **"Port Visibility"** → **"Public"**
 4. Do the same for port **3000**
+
+Also you need to create .env files in the backend. For reference check the section below. 
 
 ###  For running locally on your pc
 
