@@ -39,7 +39,6 @@ export default function InteractiveMagnetogram() {
   useEffect(() => {
     const updateSize = () => {
       if (!containerRef.current) return
-
       const rect = containerRef.current.getBoundingClientRect()
 
       setDisplaySize({
@@ -75,15 +74,15 @@ export default function InteractiveMagnetogram() {
   const flareClasses = ["A", "B", "C", "M", "X"] as const
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-10 items-center w-full h-full mt-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 items-stretch w-full mt-4">
 
-      {/* INFO PANEL */}
-      <div className="flex flex-col justify-center space-y-3 md:space-y-3 lg:space-y-4 min-w-0">
+      {/* ================= LEFT PANEL ================= */}
+      <div className="flex flex-col justify-center space-y-4 min-w-0">
+
         {!clicked ? (
           <>
-            <p className="text-zinc-300 text-xs sm:text-sm md:text-sm lg:text-base leading-relaxed">
-              Magnetograms reveal solar magnetic field structures.
-              Click a{" "}
+            <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed">
+              Magnetograms reveal solar magnetic field structures. Click a{" "}
               <span className="text-lime-400 font-semibold">
                 highlighted region
               </span>{" "}
@@ -91,9 +90,7 @@ export default function InteractiveMagnetogram() {
             </p>
 
             {loading && (
-              <p className="text-white/30 text-xs">
-                Loading regions...
-              </p>
+              <p className="text-white/30 text-xs">Loading regions...</p>
             )}
 
             {!loading && regions.length > 0 && (
@@ -109,7 +106,8 @@ export default function InteractiveMagnetogram() {
             )}
           </>
         ) : (
-          <div className="space-y-3 md:space-y-3 lg:space-y-4 w-full">
+          <div className="space-y-4">
+
             <div className="flex items-center justify-between">
               <p className="text-white/40 text-[10px] md:text-xs uppercase tracking-widest">
                 Active Region AR{clicked.id}
@@ -117,7 +115,7 @@ export default function InteractiveMagnetogram() {
 
               <button
                 onClick={() => setClicked(null)}
-                className="text-white/30 hover:text-white/60 text-[10px] md:text-xs transition"
+                className="text-white/30 hover:text-white/60 text-[10px] md:text-xs"
               >
                 ✕ clear
               </button>
@@ -163,19 +161,19 @@ export default function InteractiveMagnetogram() {
                     : { bar: "bg-blue-400", text: "text-blue-400" }
 
                 return (
-                  <div key={cls} className="flex items-center gap-2 md:gap-3">
-                    <span className={`text-xs md:text-sm font-bold w-4 ${color.text}`}>
+                  <div key={cls} className="flex items-center gap-3">
+                    <span className={`w-4 text-xs font-bold ${color.text}`}>
                       {cls}
                     </span>
 
-                    <div className="flex-1 bg-white/10 rounded-full h-1.5 md:h-2">
+                    <div className="flex-1 bg-white/10 rounded-full h-2">
                       <div
-                        className={`h-1.5 md:h-2 rounded-full ${color.bar}`}
+                        className={`h-2 rounded-full ${color.bar}`}
                         style={{ width: `${val}%` }}
                       />
                     </div>
 
-                    <span className="text-white/40 text-xs md:text-sm w-8 text-right">
+                    <span className="text-white/40 text-xs w-8 text-right">
                       {val}%
                     </span>
                   </div>
@@ -186,85 +184,81 @@ export default function InteractiveMagnetogram() {
         )}
       </div>
 
-      {/* IMAGE PANEL */}
-      <div className="flex items-center justify-center">
-        <div
-          ref={containerRef}
-          className="
-            relative
-            w-[clamp(150px,28vw,260px)]
-            h-[clamp(150px,28vw,260px)]
-            lg:w-[clamp(240px,26vw,420px)]
-            lg:h-[clamp(240px,26vw,420px)]
-            flex-shrink-0
-          "
-        >
-          <img
-            src={`${BASE_URL}/space-weather/magnetogram/image`}
-            alt="HMI Magnetogram"
-            className="w-full h-full rounded-full object-cover border border-white/10 block"
-          />
+      {/* ================= RIGHT PANEL ================= */}
+      <div className="flex flex-col items-center justify-center w-full">
 
-          {regions.map((region) => {
-            const s = scaleBbox(region.bbox)
-            const isSelected = clicked?.id === region.id
+        {/* Heading */}
+        <h2 className="text-white/70 text-xs sm:text-sm md:text-base tracking-widest uppercase mb-3 text-center">
+          Solar Magnetogram
+        </h2>
 
-            return (
-              <div
-                key={region.id}
-                onClick={() => setClicked(region)}
-                style={{
-                  position: "absolute",
-                  left: s.left,
-                  top: s.top,
-                  width: s.width,
-                  height: s.height,
-                  border: `3px solid ${
-                    isSelected
-                      ? "rgba(34,197,94,1)"
-                      : "rgba(163,230,53,0.95)"
-                  }`,
-                  borderRadius: "999px",
-                  background: "transparent",
-                  boxShadow: isSelected
-                    ? "0 0 18px rgba(34,197,94,0.55)"
-                    : "0 0 12px rgba(163,230,53,0.35)",
-                  cursor: "pointer",
-                  boxSizing: "border-box",
-                  transition: "all 0.25s ease",
-                  transform: isSelected ? "scale(1.08)" : "scale(1)",
-                }}
-              >
-                <span
+        {/* SAFE IMAGE WRAPPER (NO CROPPING FIX) */}
+        <div className="relative w-[min(80vw,420px)] aspect-square max-h-[70vh]">
+
+          <div ref={containerRef} className="relative w-full h-full">
+
+            <img
+              src={`${BASE_URL}/space-weather/magnetogram/image`}
+              alt="HMI Magnetogram"
+              className="w-full h-full object-contain rounded-full border border-white/10"
+            />
+
+            {/* REGION OVERLAYS */}
+            {regions.map((region) => {
+              const s = scaleBbox(region.bbox)
+              const isSelected = clicked?.id === region.id
+
+              return (
+                <div
+                  key={region.id}
+                  onClick={() => setClicked(region)}
                   style={{
                     position: "absolute",
-                    top: -28,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    fontSize: "12px",
-                    fontFamily: "monospace",
-                    fontWeight: "700",
-                    padding: "4px 10px",
+                    left: s.left,
+                    top: s.top,
+                    width: s.width,
+                    height: s.height,
+                    border: `3px solid ${
+                      isSelected
+                        ? "rgba(34,197,94,1)"
+                        : "rgba(163,230,53,0.95)"
+                    }`,
                     borderRadius: "999px",
-                    background: isSelected
-                      ? "rgba(34,197,94,0.18)"
-                      : "rgba(163,230,53,0.15)",
-                    color: isSelected
-                      ? "rgb(187,247,208)"
-                      : "rgb(217,249,157)",
-                    border: isSelected
-                      ? "1px solid rgba(34,197,94,0.35)"
-                      : "1px solid rgba(163,230,53,0.30)",
-                    whiteSpace: "nowrap",
-                    textShadow: "0 0 8px rgba(0,0,0,0.75)",
-                    letterSpacing: "0.5px",
+                    cursor: "pointer",
+                    boxShadow: isSelected
+                      ? "0 0 18px rgba(34,197,94,0.55)"
+                      : "0 0 12px rgba(163,230,53,0.35)",
+                    transform: isSelected ? "scale(1.08)" : "scale(1)",
+                    transition: "all 0.25s ease",
+                    boxSizing: "border-box",
                   }}
                 >
-                  AR{region.id}
-                </span>
-              </div>
-            )
-          })}
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: -28,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      padding: "4px 10px",
+                      borderRadius: "999px",
+                      background: isSelected
+                        ? "rgba(34,197,94,0.18)"
+                        : "rgba(163,230,53,0.15)",
+                      color: isSelected
+                        ? "rgb(187,247,208)"
+                        : "rgb(217,249,157)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    AR{region.id}
+                  </span>
+                </div>
+              )
+            })}
+
+          </div>
         </div>
       </div>
     </div>
