@@ -26,11 +26,12 @@ export async function getSolarFlares() {
 // add this to lib/api.ts
 export function getAIAImageUrl(wavelength: string): string {
   const codes: Record<string, string> = {
-    "94Å":  "0094",
+    "94Å": "0094",
     "131Å": "0131",
     "171Å": "0171",
     "193Å": "0193",
   }
+
   return `${BASE_URL}/space-weather/aia-image?wavelength=${codes[wavelength]}`
 }
 // --- CME Data ---
