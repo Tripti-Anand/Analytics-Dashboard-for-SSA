@@ -1,5 +1,17 @@
+# Node / Next
 node_modules/
 .next/
+
+# Python
 venv/
-backend/app/assets/cme/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment files
 *.env
+
+# Generated backend assets
+backend/app/assets/cme/
+backend/assets/flare/magnetogram/latest.png
+backend/assets/flare/magnetogram/latest_hmi.fits
