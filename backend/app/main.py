@@ -1,3 +1,5 @@
+import pymysql
+pymysql.install_as_MySQLdb()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.space_weather import router as space_weather_router
