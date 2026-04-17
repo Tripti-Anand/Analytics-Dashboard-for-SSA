@@ -76,7 +76,7 @@ export default function InteractiveMagnetogram() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 items-stretch w-full mt-4">
 
-      {/* ================= LEFT PANEL ================= */}
+      {/* LEFT PANEL */}
       <div className="flex flex-col justify-center space-y-4 min-w-0">
 
         {!clicked ? (
@@ -184,16 +184,15 @@ export default function InteractiveMagnetogram() {
         )}
       </div>
 
-      {/* ================= RIGHT PANEL ================= */}
+      {/* RIGHT PANEL */}
       <div className="flex flex-col items-center justify-center w-full">
 
-        {/* Heading */}
         <h2 className="text-white/70 text-xs sm:text-sm md:text-base tracking-widest uppercase mb-3 text-center">
           Solar Magnetogram
         </h2>
 
-        {/* SAFE IMAGE WRAPPER (NO CROPPING FIX) */}
-        <div className="relative w-[min(80vw,420px)] aspect-square max-h-[70vh]">
+        {/* ✅ IMPROVED RESPONSIVE WRAPPER */}
+        <div className="relative w-[85vw] sm:w-[70vw] md:w-[270px] laptop:w-[390px] desktop:w-[550px] aspect-square">
 
           <div ref={containerRef} className="relative w-full h-full">
 
@@ -203,7 +202,6 @@ export default function InteractiveMagnetogram() {
               className="w-full h-full object-contain rounded-full border border-white/10"
             />
 
-            {/* REGION OVERLAYS */}
             {regions.map((region) => {
               const s = scaleBbox(region.bbox)
               const isSelected = clicked?.id === region.id

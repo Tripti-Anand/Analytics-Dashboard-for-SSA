@@ -7,6 +7,8 @@ import GlassCard from "@/components/GlassCard";
 import ServiceCards from "@/components/home/ServiceCards";
 import { SOLAR_WIND_CARDS } from "@/constants/solar-wind-cards";
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
 function last<T>(arr: T[]): T | undefined {
   return arr[arr.length - 1];
 }
@@ -25,6 +27,8 @@ function formatTime(tag: string): string {
   });
 }
 
+// ─── Sub-components ─────────────────────────────────────────────────────────
+
 function StatCard({
   title,
   value,
@@ -42,24 +46,15 @@ function StatCard({
 }) {
   return (
     <GlassCard>
-      <div className="p-5 sm:p-6 lg:p-8">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-300 mb-2">
-          {title}
-        </h3>
-
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <p className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${color}`}>
-            {value}
-          </p>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-400">{unit}</p>
+      <div className="p-8">
+        <h3 className="text-lg font-semibold text-gray-300 mb-2">{title}</h3>
+        <div className="flex items-baseline gap-2">
+          <p className={`text-5xl font-bold ${color}`}>{value}</p>
+          <p className="text-xl text-gray-400">{unit}</p>
         </div>
-
-        <p className="text-xs sm:text-sm text-gray-500 mt-4">{sub}</p>
-
+        <p className="text-sm text-gray-500 mt-4">{sub}</p>
         {timestamp && (
-          <p className="text-[11px] sm:text-xs text-gray-600 mt-2">
-            Updated: {timestamp}
-          </p>
+          <p className="text-xs text-gray-600 mt-2">Updated: {timestamp}</p>
         )}
       </div>
     </GlassCard>
@@ -68,12 +63,12 @@ function StatCard({
 
 function LoadingSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-8 mb-12 lg:mb-16">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
       {[1, 2, 3].map((i) => (
         <GlassCard key={i}>
-          <div className="p-5 sm:p-6 lg:p-8 animate-pulse space-y-4">
+          <div className="p-8 animate-pulse space-y-4">
             <div className="h-4 bg-white/10 rounded w-1/2" />
-            <div className="h-10 sm:h-12 bg-white/10 rounded w-3/4" />
+            <div className="h-12 bg-white/10 rounded w-3/4" />
             <div className="h-3 bg-white/10 rounded w-1/3" />
           </div>
         </GlassCard>
@@ -81,6 +76,8 @@ function LoadingSkeleton() {
     </div>
   );
 }
+
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function SolarWindPage() {
   const [solarWindData, setSolarWindData] = useState<SolarWindDataPoint[]>([]);
@@ -93,9 +90,7 @@ export default function SolarWindPage() {
     try {
       setLoading(true);
       setError(null);
-
       const response = await getAllSolarWindData();
-
       setSolarWindData(response.solar_wind || []);
       setIMFData(response.imf || []);
       setLastFetched(new Date());
@@ -113,6 +108,7 @@ export default function SolarWindPage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  // ── Derived values ──
   const latestWind = last(solarWindData);
   const latestIMF = last(imfData);
 
@@ -144,15 +140,11 @@ export default function SolarWindPage() {
   return (
     <>
       {/* Hero */}
-      <section className="min-h-[60vh] sm:min-h-[70vh] lg:min-h-[90vh] flex flex-col items-center justify-center text-center gap-4 sm:gap-6 px-4">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase">
-          Solar Wind
-        </h1>
-
-        <p className="text-gray-400 text-sm sm:text-base lg:text-lg max-w-xl">
+      <section className="h-[110vh] flex flex-col items-center justify-center text-center gap-6">
+        <h1 className="text-7xl font-black uppercase">Solar Wind</h1>
+        <p className="text-gray-400 text-lg max-w-xl">
           Real-time plasma and interplanetary magnetic field data from NOAA SWPC
         </p>
-
         {lastFetched && (
           <p className="text-xs text-gray-600">
             Last updated: {lastFetched.toLocaleTimeString()} · refreshes every 5 min
@@ -160,12 +152,12 @@ export default function SolarWindPage() {
         )}
       </section>
 
-      {/* Stats */}
-      <section className="py-14 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black via-purple-900/10 to-black">
+      {/* Stat Cards */}
+      <section className="py-24 px-6 bg-gradient-to-b from-black via-purple-900/10 to-black">
         {loading ? (
           <LoadingSkeleton />
         ) : (
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-8 mb-12 lg:mb-16">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <StatCard
               title="Solar Wind Speed"
               value={currentSpeed.toFixed(0)}
@@ -174,7 +166,6 @@ export default function SolarWindPage() {
               timestamp={latestWind ? formatTime(latestWind.time_tag) : undefined}
               color="text-cyan-400"
             />
-
             <StatCard
               title="Plasma Density"
               value={currentDensity.toFixed(2)}
@@ -183,7 +174,6 @@ export default function SolarWindPage() {
               timestamp={latestWind ? formatTime(latestWind.time_tag) : undefined}
               color="text-blue-400"
             />
-
             <StatCard
               title="IMF Bz Component"
               value={currentBz.toFixed(2)}
@@ -195,8 +185,9 @@ export default function SolarWindPage() {
           </div>
         )}
 
+        {/* Secondary Cards */}
         {!loading && !error && (
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 mb-12 lg:mb-16">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             <StatCard
               title="Total IMF Magnitude (Bt)"
               value={currentBt.toFixed(2)}
@@ -205,10 +196,13 @@ export default function SolarWindPage() {
               timestamp={latestIMF ? formatTime(latestIMF.time_tag) : undefined}
               color="text-purple-400"
             />
-
             <StatCard
               title="Solar Wind Temperature"
-              value={currentTemp > 0 ? (currentTemp / 1e6).toFixed(2) : "N/A"}
+              value={
+                currentTemp > 0
+                  ? (currentTemp / 1e6).toFixed(2)
+                  : "N/A"
+              }
               unit={currentTemp > 0 ? "MK" : ""}
               sub="Proton temperature of solar wind plasma"
               timestamp={latestWind ? formatTime(latestWind.time_tag) : undefined}
@@ -217,41 +211,10 @@ export default function SolarWindPage() {
           </div>
         )}
 
-        {!loading && !error && solarWindData.length > 0 && (
-          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: "Wind Data Points", value: solarWindData.length },
-              { label: "IMF Data Points", value: imfData.length },
-              {
-                label: "Storm Risk",
-                value:
-                  currentBz < -10
-                    ? "High"
-                    : currentBz < -5
-                    ? "Moderate"
-                    : "Low",
-              },
-              {
-                label: "Current Status",
-                value: speedStatus,
-              },
-            ].map((item) => (
-              <GlassCard key={item.label}>
-                <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                  <p className="text-sm font-semibold text-gray-200">
-                    {item.value}
-                  </p>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
-        )}
-
+        {/* Error Banner */}
         {error && (
-          <div className="max-w-7xl mx-auto mt-8 p-4 bg-red-900/30 border border-red-500/50 rounded-lg flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div className="max-w-7xl mx-auto mb-8 p-4 bg-red-900/30 border border-red-500/50 rounded-lg flex items-center justify-between">
             <p className="text-red-300">⚠️ {error}</p>
-
             <button
               onClick={fetchData}
               className="text-sm text-red-300 border border-red-500/50 px-3 py-1 rounded hover:bg-red-900/40 transition"
@@ -260,8 +223,36 @@ export default function SolarWindPage() {
             </button>
           </div>
         )}
+
+        {/* Data Summary Row */}
+        {!loading && !error && solarWindData.length > 0 && (
+          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Wind Data Points", value: solarWindData.length },
+              { label: "IMF Data Points", value: imfData.length },
+              {
+                label: "Time Range",
+                value: solarWindData.length > 1
+                  ? `${formatTime(solarWindData[0].time_tag)} → ${formatTime(last(solarWindData)!.time_tag)}`
+                  : "—",
+              },
+              {
+                label: "Storm Risk",
+                value: currentBz < -10 ? "High" : currentBz < -5 ? "Moderate" : "Low",
+              },
+            ].map((item) => (
+              <GlassCard key={item.label}>
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-1">{item.label}</p>
+                  <p className="text-sm font-semibold text-gray-200">{item.value}</p>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        )}
       </section>
 
+      {/* Service Cards */}
       <ServiceCards cards={SOLAR_WIND_CARDS} />
     </>
   );

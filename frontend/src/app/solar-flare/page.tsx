@@ -45,10 +45,8 @@ export default function SolarFlarePage() {
         </div>
       </section>
 
-      {/* Service Cards */}
-      <section className="px-4 sm:px-6 md:px-8 lg:px-12 pb-12 sm:pb-16 lg:pb-20">
-        <ServiceCards cards={SOLAR_FLARE_CARDS} />
-      </section>
+      {/* ✅ FIX: NO WRAPPER, NO PADDING */}
+      <ServiceCards cards={SOLAR_FLARE_CARDS} />
     </>
   );
 }

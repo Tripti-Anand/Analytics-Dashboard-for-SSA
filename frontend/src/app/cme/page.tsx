@@ -29,11 +29,7 @@ export default function CMEPage() {
           CME
         </h1>
       </section>
-
-      {/* Cards */}
-      <section className="px-4 sm:px-6 md:px-8 lg:px-12 pb-12 sm:pb-16 lg:pb-20">
-        <ServiceCards cards={CME_CARDS} />
-      </section>
+      <ServiceCards cards={CME_CARDS} />
     </>
   );
 }
