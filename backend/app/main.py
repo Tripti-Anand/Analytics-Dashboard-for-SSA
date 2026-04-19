@@ -18,11 +18,21 @@ app = FastAPI(title="SSA Backend")
 # ✅ ADD THIS (VERY IMPORTANT)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+import os
 
 # Allow frontend access
+frontend_url = os.getenv("FRONTEND_URL", "")
+
+origins = [
+    "http://localhost:3000",  # For local development
+]
+
+if frontend_url:
+    origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
