@@ -387,6 +387,15 @@ def test_NO005_exception_returns_empty():
     assert result == []
 
 
+def test_NO006_both_outages_return_empty():
+    """NO-006: Both primary and secondary channel outages each return empty list"""
+    result_primary = NOAAFetcher._process(Exception("primary down"))
+    result_secondary = NOAAFetcher._process(Exception("secondary down"))
+    print(f"\n[NO-006] primary outage → {result_primary} | secondary outage → {result_secondary}")
+    assert result_primary == []
+    assert result_secondary == []
+
+
 def test_NO007_items_have_time_tag_and_flux():
     """NO-007: Items have time_tag and flux keys"""
     data = [{"energy": "0.1-0.8nm", "observed_flux": 1.2e-8, "time_tag": "2026-04-16T00:00Z", "flux": 1.2e-8}]

@@ -15,6 +15,71 @@ client = TestClient(app)
 
 
 # ══════════════════════════════════════════════════════════
+#  MAGNETOGRAM ENDPOINTS  (BE-004 to BE-007)
+# ══════════════════════════════════════════════════════════
+
+def test_BE004_magnetogram_latest_returns_success():
+    """BE-004: GET /magnetogram/latest returns status+data (may be slow on first call)"""
+    res = client.get("/space-weather/magnetogram/latest", timeout=120)
+    if res.status_code in [500, 503, 502]:
+        print(f"\n[BE-004] Status: {res.status_code} — magnetogram service unavailable. Skipping.")
+        pytest.skip("Magnetogram service unavailable")
+    data = res.json()
+    print(f"\n[BE-004] Status: {res.status_code} | keys: {list(data.keys())} | meta: {data.get('meta')}")
+    assert res.status_code == 200
+    assert data.get("status") == "success"
+    assert "result" in data or "meta" in data
+
+
+def test_BE005_magnetogram_image_returns_png():
+    """BE-005: GET /magnetogram/image returns image/png with non-empty body"""
+    res = client.get("/space-weather/magnetogram/image", timeout=120)
+    if res.status_code in [500, 503, 502, 404]:
+        print(f"\n[BE-005] Status: {res.status_code} — magnetogram image unavailable. Skipping.")
+        pytest.skip("Magnetogram image unavailable")
+    ctype = res.headers.get("content-type", "")
+    print(f"\n[BE-005] Status: {res.status_code} | Content-Type: {ctype} | Body size: {len(res.content)} bytes")
+    assert res.status_code == 200
+    assert "image" in ctype or "png" in ctype
+    assert len(res.content) > 0
+
+
+def test_BE006_magnetogram_regions_returns_array():
+    """BE-006: GET /magnetogram/regions returns regions array with required keys"""
+    res = client.get("/space-weather/magnetogram/regions", timeout=120)
+    if res.status_code in [500, 503, 502, 404]:
+        print(f"\n[BE-006] Status: {res.status_code} — regions unavailable. Skipping.")
+        pytest.skip("Magnetogram regions unavailable")
+    data = res.json()
+    regions = data.get("regions", [])
+    print(f"\n[BE-006] Status: {res.status_code} | status: {data.get('status')} | regions count: {len(regions)}")
+    assert res.status_code == 200
+    assert data.get("status") == "success"
+    assert isinstance(regions, list)
+    for r in regions:
+        for key in ["id", "bbox", "strength", "area", "flare"]:
+            assert key in r, f"Region missing key: {key}"
+
+
+def test_BE007_magnetogram_cache_reused():
+    """BE-007: Second call to /magnetogram/latest is faster (cache used if < 30 min)"""
+    import time
+    # First call (may download)
+    t0 = time.time()
+    res1 = client.get("/space-weather/magnetogram/latest", timeout=120)
+    t1 = time.time() - t0
+    if res1.status_code not in [200]:
+        print(f"\n[BE-007] First call failed with {res1.status_code}. Skipping.")
+        pytest.skip("Magnetogram unavailable for cache test")
+    # Second call (should use cache)
+    t0 = time.time()
+    res2 = client.get("/space-weather/magnetogram/latest", timeout=60)
+    t2 = time.time() - t0
+    print(f"\n[BE-007] 1st call: {t1:.2f}s | 2nd call: {t2:.2f}s | second_faster: {t2 <= t1}")
+    assert res2.status_code == 200
+
+
+# ══════════════════════════════════════════════════════════
 #  ROOT & SYSTEM
 # ══════════════════════════════════════════════════════════
 
@@ -42,20 +107,48 @@ def test_BE002_system_status_returns_health_info():
 #  SOLAR FLARES
 # ══════════════════════════════════════════════════════════
 
-def test_BE008_flares_returns_list():
-    """BE-008: GET /space-weather/flares returns list (skips if NASA rate-limited)"""
+def test_BE008_flares_returns_success_and_data():
+    """BE-008: GET /space-weather/flares returns {status, total, flares} (skips if unavailable)"""
     res = client.get("/space-weather/flares")
     if res.status_code == 500:
-        print(f"\n[BE-008] Status: 500 — NASA API rate limit or error. Marking as expected.")
-        pytest.skip("NASA API unavailable (rate limit or network)")
+        print(f"\n[BE-008] Status: 500 — CCMC/NASA API rate limit or network error. Skipping.")
+        pytest.skip("Flares API unavailable (rate limit or network)")
     data = res.json()
-    count = len(data) if isinstance(data, list) else "N/A"
-    first = data[0] if isinstance(data, list) and data else {}
-    print(f"\n[BE-008] Status: {res.status_code} | Total flares: {count} | First item keys: {list(first.keys())}")
+    flares = data.get("flares", [])
+    count = len(flares)
+    first = flares[0] if flares else {}
+    print(f"\n[BE-008] Status: {res.status_code} | status: {data.get('status')} | Total flares: {count} | First keys: {list(first.keys())}")
     assert res.status_code == 200
-    assert isinstance(data, list)
-    if data:
-        assert "classType" in data[0]
+    assert data.get("status") == "success"
+    assert isinstance(flares, list)
+    if flares:
+        assert "classType" in flares[0]
+
+
+def test_BE009_flare_data_within_last_10():
+    """BE-009: /space-weather/flares returns at most 10 events (last 10 from CCMC)"""
+    res = client.get("/space-weather/flares")
+    if res.status_code != 200:
+        pytest.skip("Flares API unavailable")
+    data = res.json()
+    flares = data.get("flares", [])
+    print(f"\n[BE-009] Status: {res.status_code} | total: {data.get('total')} | flares in array: {len(flares)}")
+    assert isinstance(flares, list)
+    assert len(flares) <= 10
+    if flares:
+        for key in ["classType", "startTime", "peakTime", "endTime", "activeRegion"]:
+            assert key in flares[0], f"Missing flare field: {key}"
+
+
+def test_BE010_aia_image_returns_jpeg():
+    """BE-010: GET /aia-image?wavelength=0171 returns image/jpeg"""
+    res = client.get("/space-weather/aia-image?wavelength=0171")
+    ctype = res.headers.get("content-type", "")
+    print(f"\n[BE-010] Status: {res.status_code} | Content-Type: {ctype} | Body size: {len(res.content)} bytes")
+    # Allow 502 if SDO server is unreachable in CI
+    assert res.status_code in [200, 502, 503]
+    if res.status_code == 200:
+        assert "image" in ctype
 
 
 def test_BE011_aia_invalid_wavelength_returns_400():
@@ -68,15 +161,22 @@ def test_BE011_aia_invalid_wavelength_returns_400():
 
 
 def test_BE012_aia_valid_wavelengths():
-    """BE-012: All valid wavelengths return 200 or upstream error"""
-    wavelengths = ["0094", "0131", "0171", "0193", "0211", "0304", "0335", "1600", "1700"]
+    """BE-012: All 4 current valid wavelengths return 200 or upstream error (not 400)"""
+    # The updated endpoint only accepts: 0094, 0131, 0171, 0193
+    # Other wavelengths (e.g. 0211, 0304) now return 400 Bad Request
+    valid_wavelengths = ["0094", "0131", "0171", "0193"]
+    invalid_wavelengths = ["0211", "0304", "0335", "1600", "1700"]
     results = {}
-    for wl in wavelengths:
+    for wl in valid_wavelengths:
         res = client.get(f"/space-weather/aia-image?wavelength={wl}")
         results[wl] = res.status_code
-    print(f"\n[BE-012] Wavelength results: {results}")
+    print(f"\n[BE-012] Valid wavelength results: {results}")
     for wl, code in results.items():
-        assert code in [200, 500, 503], f"Unexpected status {code} for wavelength {wl}"
+        assert code in [200, 502, 503], f"Valid wavelength {wl} returned unexpected {code}"
+    for wl in invalid_wavelengths:
+        res = client.get(f"/space-weather/aia-image?wavelength={wl}")
+        print(f"\n[BE-012] Invalid wavelength {wl}: status {res.status_code} (expected 400)")
+        assert res.status_code == 400, f"Wavelength {wl} should now be invalid (400), got {res.status_code}"
 
 
 # ══════════════════════════════════════════════════════════

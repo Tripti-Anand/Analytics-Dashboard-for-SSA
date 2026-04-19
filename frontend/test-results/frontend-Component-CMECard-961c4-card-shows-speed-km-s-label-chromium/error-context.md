@@ -7,7 +7,7 @@
 # Test info
 
 - Name: frontend.spec.ts >> Component: CMECards >> FC-010: CMEVelocity card shows speed + km/s label
-- Location: tests\frontend.spec.ts:352:7
+- Location: tests\frontend.spec.ts:366:7
 
 # Error details
 
@@ -99,20 +99,6 @@ Call log:
 # Test source
 
 ```ts
-  253 |     console.log(`[FP-020] Retry button visible: ${hasRetry} | Error text visible: ${hasError}`);
-  254 |     expect(hasRetry || hasError).toBeTruthy();
-  255 |   });
-  256 | });
-  257 | 
-  258 | 
-  259 | // ═══════════════════════════════════════════════════════════════════════════════
-  260 | //  FRONTEND COMPONENTS  (FC-001 to FC-014)
-  261 | // ═══════════════════════════════════════════════════════════════════════════════
-  262 | 
-  263 | test.describe("Component: GOESFluxChart", () => {
-  264 |   test("FC-001: GOES Plotly chart renders with two traces on solar-flare page", async ({ page }) => {
-  265 |     await page.goto(`${FE}/solar-flare`);
-  266 |     const chart = page.locator(".plotly-graph-div, .js-plotly-plot").first();
   267 |     await expect(chart).toBeVisible({ timeout: 20000 });
   268 |     const legendItems = page.locator(".legendtext");
   269 |     const count = await legendItems.count();
@@ -171,134 +157,148 @@ Call log:
   322 |     expect(await classCol.isVisible()).toBeTruthy();
   323 |   });
   324 | 
-  325 |   test("FC-006: M-class flare badge shows orange color", async ({ page }) => {
+  325 |   test("FC-006: X-class flare badge shows red color", async ({ page }) => {
   326 |     await page.goto(`${FE}/solar-flare`);
   327 |     await page.waitForTimeout(3000);
-  328 |     const mBadge = page.locator("span").filter({ hasText: /^M\d/ }).first();
-  329 |     if (await mBadge.count() > 0) {
-  330 |       const cls = await mBadge.getAttribute("class") ?? "";
-  331 |       console.log(`[FC-006] M-class badge class: "${cls}"`);
-  332 |       expect(cls).toContain("orange");
+  328 |     const xBadge = page.locator("span").filter({ hasText: /^X\d/ }).first();
+  329 |     if (await xBadge.count() > 0) {
+  330 |       const cls = await xBadge.getAttribute("class") ?? "";
+  331 |       console.log(`[FC-006] X-class badge class: "${cls}"`);
+  332 |       expect(cls).toContain("red");
   333 |     } else {
-  334 |       console.log(`[FC-006] No M-class flares in current data`);
+  334 |       console.log(`[FC-006] No X-class flares in current data`);
   335 |       test.skip();
   336 |     }
   337 |   });
   338 | 
-  339 |   test("FC-008/FC-009: Shows flare rows or 'No flare events found'", async ({ page }) => {
+  339 |   test("FC-007: M-class flare badge shows orange color", async ({ page }) => {
   340 |     await page.goto(`${FE}/solar-flare`);
-  341 |     await page.waitForTimeout(4000);
-  342 |     const noFlares = page.getByText("No flare events found").first();
-  343 |     const rows     = page.locator(".grid.grid-cols-5 > span").first();
-  344 |     const hasNoFlares = await noFlares.isVisible();
-  345 |     const hasRows     = await rows.isVisible();
-  346 |     console.log(`[FC-008/FC-009] 'No flare events found': ${hasNoFlares} | Flare rows visible: ${hasRows}`);
-  347 |     expect(hasNoFlares || hasRows).toBeTruthy();
-  348 |   });
-  349 | });
-  350 | 
-  351 | test.describe("Component: CMECards", () => {
-  352 |   test("FC-010: CMEVelocity card shows speed + km/s label", async ({ page }) => {
-> 353 |     await page.goto(`${FE}/cme`);
+  341 |     await page.waitForTimeout(3000);
+  342 |     const mBadge = page.locator("span").filter({ hasText: /^M\d/ }).first();
+  343 |     if (await mBadge.count() > 0) {
+  344 |       const cls = await mBadge.getAttribute("class") ?? "";
+  345 |       console.log(`[FC-007] M-class badge class: "${cls}"`);
+  346 |       expect(cls).toContain("orange");
+  347 |     } else {
+  348 |       console.log(`[FC-007] No M-class flares in current data`);
+  349 |       test.skip();
+  350 |     }
+  351 |   });
+  352 | 
+  353 |   test("FC-008/FC-009: Shows flare rows or 'No flare events found'", async ({ page }) => {
+  354 |     await page.goto(`${FE}/solar-flare`);
+  355 |     await page.waitForTimeout(4000);
+  356 |     const noFlares = page.getByText("No flare events found").first();
+  357 |     const rows     = page.locator(".grid.grid-cols-5 > span").first();
+  358 |     const hasNoFlares = await noFlares.isVisible();
+  359 |     const hasRows     = await rows.isVisible();
+  360 |     console.log(`[FC-008/FC-009] 'No flare events found': ${hasNoFlares} | Flare rows visible: ${hasRows}`);
+  361 |     expect(hasNoFlares || hasRows).toBeTruthy();
+  362 |   });
+  363 | });
+  364 | 
+  365 | test.describe("Component: CMECards", () => {
+  366 |   test("FC-010: CMEVelocity card shows speed + km/s label", async ({ page }) => {
+> 367 |     await page.goto(`${FE}/cme`);
       |                ^ Error: page.goto: Test timeout of 30000ms exceeded.
-  354 |     await page.waitForTimeout(2000);
-  355 |     const kms = page.getByText("km/s").first();
-  356 |     await expect(kms).toBeVisible({ timeout: 15000 });
-  357 |     console.log(`[FC-010] 'km/s' label visible: true`);
-  358 |   });
-  359 | 
-  360 |   test("FC-011: CME Impact Probability shows High/Moderate/Low bars", async ({ page }) => {
-  361 |     await page.goto(`${FE}/cme`);
-  362 |     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
-  363 |     await page.waitForTimeout(2000);
-  364 |     const high = page.getByText("High").first();
-  365 |     const mod  = page.getByText("Moderate").first();
-  366 |     console.log(`[FC-011] High visible: ${await high.isVisible()} | Moderate visible: ${await mod.isVisible()}`);
-  367 |     expect(await high.isVisible() || await mod.isVisible()).toBeTruthy();
-  368 |   });
-  369 | 
-  370 |   test("FC-012: CME Coronagraph image has src attribute", async ({ page }) => {
-  371 |     await page.goto(`${FE}/cme`);
-  372 |     await page.waitForTimeout(2000);
-  373 |     const img = page.locator("img").filter({ hasNot: page.locator("[alt='']") }).first();
-  374 |     const src = await img.getAttribute("src").catch(() => "");
-  375 |     console.log(`[FC-012] Image src: "${src}"`);
-  376 |     expect(src?.length).toBeGreaterThan(0);
-  377 |   });
-  378 | 
-  379 |   test("FC-013: CME Event Log shows Speed and Risk columns", async ({ page }) => {
-  380 |     await page.goto(`${FE}/cme`);
-  381 |     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  382 |     await page.waitForTimeout(2000);
-  383 |     const speed = page.getByText("Speed", { exact: false }).first();
-  384 |     const risk  = page.getByText("Risk",  { exact: false }).first();
-  385 |     console.log(`[FC-013] Speed: ${await speed.isVisible()} | Risk: ${await risk.isVisible()}`);
-  386 |     expect(await speed.isVisible() || await risk.isVisible()).toBeTruthy();
-  387 |   });
-  388 | 
-  389 |   test("FC-014: GlassCard renders children (basic check)", async ({ page }) => {
-  390 |     await page.goto(`${FE}/sep`);
-  391 |     await waitForNoSkeleton(page);
-  392 |     // GlassCard wraps stat values — check a rendered value exists
-  393 |     const card = page.locator(".glass, [class*='glass']").first();
-  394 |     const exists = await card.count() > 0;
-  395 |     console.log(`[FC-014] GlassCard element found: ${exists}`);
-  396 |     // Even if class differs, page content renders inside a card wrapper
-  397 |     expect(true).toBeTruthy();
-  398 |   });
-  399 | });
-  400 | 
-  401 | 
-  402 | // ═══════════════════════════════════════════════════════════════════════════════
-  403 | //  END-TO-END FLOWS  (E2E-001 to E2E-010)
-  404 | // ═══════════════════════════════════════════════════════════════════════════════
-  405 | 
-  406 | test.describe("E2E Integration Flows", () => {
-  407 |   test("E2E-001: Solar Flare full flow — page loads with live data, no console errors", async ({ page }) => {
-  408 |     const errors: string[] = [];
-  409 |     page.on("console", (msg) => {
-  410 |       if (msg.type() === "error") errors.push(msg.text());
-  411 |     });
-  412 |     await page.goto(`${FE}/solar-flare`);
-  413 |     await page.waitForTimeout(5000);
-  414 |     console.log(`[E2E-001] Console errors: ${errors.length > 0 ? errors.join(" | ") : "none"}`);
-  415 |     // No fatal JS errors
-  416 |     const fatalErrors = errors.filter(e => !e.includes("favicon") && !e.includes("404"));
-  417 |     expect(fatalErrors).toHaveLength(0);
-  418 |   });
+  368 |     await page.waitForTimeout(2000);
+  369 |     const kms = page.getByText("km/s").first();
+  370 |     await expect(kms).toBeVisible({ timeout: 15000 });
+  371 |     console.log(`[FC-010] 'km/s' label visible: true`);
+  372 |   });
+  373 | 
+  374 |   test("FC-011: CME Impact Probability shows High/Moderate/Low bars", async ({ page }) => {
+  375 |     await page.goto(`${FE}/cme`);
+  376 |     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+  377 |     await page.waitForTimeout(2000);
+  378 |     const high = page.getByText("High").first();
+  379 |     const mod  = page.getByText("Moderate").first();
+  380 |     console.log(`[FC-011] High visible: ${await high.isVisible()} | Moderate visible: ${await mod.isVisible()}`);
+  381 |     expect(await high.isVisible() || await mod.isVisible()).toBeTruthy();
+  382 |   });
+  383 | 
+  384 |   test("FC-012: CME Coronagraph image has src attribute", async ({ page }) => {
+  385 |     await page.goto(`${FE}/cme`);
+  386 |     await page.waitForTimeout(2000);
+  387 |     const img = page.locator("img").filter({ hasNot: page.locator("[alt='']") }).first();
+  388 |     const src = await img.getAttribute("src").catch(() => "");
+  389 |     console.log(`[FC-012] Image src: "${src}"`);
+  390 |     expect(src?.length).toBeGreaterThan(0);
+  391 |   });
+  392 | 
+  393 |   test("FC-013: CME Event Log shows Speed and Risk columns", async ({ page }) => {
+  394 |     await page.goto(`${FE}/cme`);
+  395 |     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  396 |     await page.waitForTimeout(2000);
+  397 |     const speed = page.getByText("Speed", { exact: false }).first();
+  398 |     const risk  = page.getByText("Risk",  { exact: false }).first();
+  399 |     console.log(`[FC-013] Speed: ${await speed.isVisible()} | Risk: ${await risk.isVisible()}`);
+  400 |     expect(await speed.isVisible() || await risk.isVisible()).toBeTruthy();
+  401 |   });
+  402 | 
+  403 |   test("FC-014: GlassCard renders children (basic check)", async ({ page }) => {
+  404 |     await page.goto(`${FE}/sep`);
+  405 |     await waitForNoSkeleton(page);
+  406 |     // GlassCard wraps stat values — check a rendered value exists
+  407 |     const card = page.locator(".glass, [class*='glass']").first();
+  408 |     const exists = await card.count() > 0;
+  409 |     console.log(`[FC-014] GlassCard element found: ${exists}`);
+  410 |     // Even if class differs, page content renders inside a card wrapper
+  411 |     expect(true).toBeTruthy();
+  412 |   });
+  413 | });
+  414 | 
+  415 | 
+  416 | // ═══════════════════════════════════════════════════════════════════════════════
+  417 | //  END-TO-END FLOWS  (E2E-001 to E2E-010)
+  418 | // ═══════════════════════════════════════════════════════════════════════════════
   419 | 
-  420 |   test("E2E-002: CME full flow — all 5 cards render data or empty state", async ({ page }) => {
-  421 |     await page.goto(`${FE}/cme`);
-  422 |     await page.waitForTimeout(4000);
-  423 | 
-  424 |     // Scroll through all cards
-  425 |     for (let i = 0; i < 5; i++) {
-  426 |       await page.keyboard.press("PageDown");
-  427 |       await page.waitForTimeout(500);
-  428 |     }
-  429 | 
-  430 |     const kmVisible    = await page.getByText("km/s").first().isVisible();
-  431 |     const typeVisible  = await page.getByText("Type", { exact: false }).first().isVisible();
-  432 |     const highVisible  = await page.getByText("High").first().isVisible();
-  433 |     console.log(`[E2E-002] km/s: ${kmVisible} | Type field: ${typeVisible} | High badge: ${highVisible}`);
-  434 |     expect(kmVisible || typeVisible || highVisible).toBeTruthy();
-  435 |   });
-  436 | 
-  437 |   test("E2E-003: SEP page full flow — proton + risk level + mission cards", async ({ page }) => {
-  438 |     await page.goto(`${FE}/sep`);
-  439 |     await waitForNoSkeleton(page);
-  440 | 
-  441 |     const pfu      = await page.getByText("pfu").first().isVisible();
-  442 |     const crew     = await page.getByText("Crew", { exact: false }).first().isVisible();
-  443 |     const riskCard = await page.getByText("Radiation Risk Level", { exact: false }).first().isVisible();
-  444 |     console.log(`[E2E-003] pfu: ${pfu} | Crew card: ${crew} | Risk Level card: ${riskCard}`);
-  445 |     expect(pfu && crew).toBeTruthy();
-  446 |   });
-  447 | 
-  448 |   test("E2E-004: Solar Wind full flow — speed, density, Bz visible", async ({ page }) => {
-  449 |     await page.goto(`${FE}/solar-wind`);
-  450 |     await waitForNoSkeleton(page);
-  451 | 
-  452 |     const kms = await page.getByText("km/s").first().isVisible();
-  453 |     const nt  = await page.getByText("nT").first().isVisible();
+  420 | test.describe("E2E Integration Flows", () => {
+  421 |   test("E2E-001: Solar Flare full flow — page loads with live data, no console errors", async ({ page }) => {
+  422 |     const errors: string[] = [];
+  423 |     page.on("console", (msg) => {
+  424 |       if (msg.type() === "error") errors.push(msg.text());
+  425 |     });
+  426 |     await page.goto(`${FE}/solar-flare`);
+  427 |     await page.waitForTimeout(5000);
+  428 |     console.log(`[E2E-001] Console errors: ${errors.length > 0 ? errors.join(" | ") : "none"}`);
+  429 |     // No fatal JS errors
+  430 |     const fatalErrors = errors.filter(e => !e.includes("favicon") && !e.includes("404"));
+  431 |     expect(fatalErrors).toHaveLength(0);
+  432 |   });
+  433 | 
+  434 |   test("E2E-002: CME full flow — all 5 cards render data or empty state", async ({ page }) => {
+  435 |     await page.goto(`${FE}/cme`);
+  436 |     await page.waitForTimeout(4000);
+  437 | 
+  438 |     // Scroll through all cards
+  439 |     for (let i = 0; i < 5; i++) {
+  440 |       await page.keyboard.press("PageDown");
+  441 |       await page.waitForTimeout(500);
+  442 |     }
+  443 | 
+  444 |     const kmVisible    = await page.getByText("km/s").first().isVisible();
+  445 |     const typeVisible  = await page.getByText("Type", { exact: false }).first().isVisible();
+  446 |     const highVisible  = await page.getByText("High").first().isVisible();
+  447 |     console.log(`[E2E-002] km/s: ${kmVisible} | Type field: ${typeVisible} | High badge: ${highVisible}`);
+  448 |     expect(kmVisible || typeVisible || highVisible).toBeTruthy();
+  449 |   });
+  450 | 
+  451 |   test("E2E-003: SEP page full flow — proton + risk level + mission cards", async ({ page }) => {
+  452 |     await page.goto(`${FE}/sep`);
+  453 |     await waitForNoSkeleton(page);
+  454 | 
+  455 |     const pfu      = await page.getByText("pfu").first().isVisible();
+  456 |     const crew     = await page.getByText("Crew", { exact: false }).first().isVisible();
+  457 |     const riskCard = await page.getByText("Radiation Risk Level", { exact: false }).first().isVisible();
+  458 |     console.log(`[E2E-003] pfu: ${pfu} | Crew card: ${crew} | Risk Level card: ${riskCard}`);
+  459 |     expect(pfu && crew).toBeTruthy();
+  460 |   });
+  461 | 
+  462 |   test("E2E-004: Solar Wind full flow — speed, density, Bz visible", async ({ page }) => {
+  463 |     await page.goto(`${FE}/solar-wind`);
+  464 |     await waitForNoSkeleton(page);
+  465 | 
+  466 |     const kms = await page.getByText("km/s").first().isVisible();
+  467 |     const nt  = await page.getByText("nT").first().isVisible();
 ```

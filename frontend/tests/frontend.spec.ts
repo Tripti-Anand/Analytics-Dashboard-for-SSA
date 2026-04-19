@@ -322,16 +322,30 @@ test.describe("Component: FlareEventLog", () => {
     expect(await classCol.isVisible()).toBeTruthy();
   });
 
-  test("FC-006: M-class flare badge shows orange color", async ({ page }) => {
+  test("FC-006: X-class flare badge shows red color", async ({ page }) => {
+    await page.goto(`${FE}/solar-flare`);
+    await page.waitForTimeout(3000);
+    const xBadge = page.locator("span").filter({ hasText: /^X\d/ }).first();
+    if (await xBadge.count() > 0) {
+      const cls = await xBadge.getAttribute("class") ?? "";
+      console.log(`[FC-006] X-class badge class: "${cls}"`);
+      expect(cls).toContain("red");
+    } else {
+      console.log(`[FC-006] No X-class flares in current data`);
+      test.skip();
+    }
+  });
+
+  test("FC-007: M-class flare badge shows orange color", async ({ page }) => {
     await page.goto(`${FE}/solar-flare`);
     await page.waitForTimeout(3000);
     const mBadge = page.locator("span").filter({ hasText: /^M\d/ }).first();
     if (await mBadge.count() > 0) {
       const cls = await mBadge.getAttribute("class") ?? "";
-      console.log(`[FC-006] M-class badge class: "${cls}"`);
+      console.log(`[FC-007] M-class badge class: "${cls}"`);
       expect(cls).toContain("orange");
     } else {
-      console.log(`[FC-006] No M-class flares in current data`);
+      console.log(`[FC-007] No M-class flares in current data`);
       test.skip();
     }
   });

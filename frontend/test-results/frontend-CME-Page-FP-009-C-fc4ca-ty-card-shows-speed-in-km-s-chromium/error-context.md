@@ -12,19 +12,13 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded.
+Test timeout of 30000ms exceeded while running "beforeEach" hook.
 ```
 
 ```
-Error: expect(locator).toBeVisible() failed
-
-Locator: getByText('km/s').first()
-Expected: visible
-Error: element(s) not found
-
+Error: page.goto: Test timeout of 30000ms exceeded.
 Call log:
-  - Expect "toBeVisible" with timeout 15000ms
-  - waiting for getByText('km/s').first()
+  - navigating to "http://localhost:3000/cme", waiting until "load"
 
 ```
 
@@ -105,6 +99,12 @@ Call log:
 # Test source
 
 ```ts
+  18  | // ═══════════════════════════════════════════════════════════════════════════════
+  19  | 
+  20  | test.describe("Home Page", () => {
+  21  |   test("FP-001: Home page renders STELAR hero text", async ({ page }) => {
+  22  |     await page.goto(FE);
+  23  |     const heading = page.locator("h1");
   24  |     await expect(heading).toContainText("STELAR");
   25  |     console.log(`[FP-001] h1 text: "${await heading.textContent()}"`);
   26  |   });
@@ -199,14 +199,14 @@ Call log:
   115 | 
   116 | test.describe("CME Page", () => {
   117 |   test.beforeEach(async ({ page }) => {
-  118 |     await page.goto(`${FE}/cme`);
+> 118 |     await page.goto(`${FE}/cme`);
+      |                ^ Error: page.goto: Test timeout of 30000ms exceeded.
   119 |     await page.waitForTimeout(2000);
   120 |   });
   121 | 
   122 |   test("FP-009: CME Velocity card shows speed in km/s", async ({ page }) => {
   123 |     const kms = page.getByText("km/s").first();
-> 124 |     await expect(kms).toBeVisible({ timeout: 15000 });
-      |                       ^ Error: expect(locator).toBeVisible() failed
+  124 |     await expect(kms).toBeVisible({ timeout: 15000 });
   125 |     const label = await kms.textContent();
   126 |     console.log(`[FP-009] km/s label visible: "${label}"`);
   127 |   });
@@ -301,10 +301,4 @@ Call log:
   216 | // ═══════════════════════════════════════════════════════════════════════════════
   217 | //  SOLAR WIND PAGE  (FP-018 to FP-020)
   218 | // ═══════════════════════════════════════════════════════════════════════════════
-  219 | 
-  220 | test.describe("Solar Wind Page", () => {
-  221 |   test.beforeEach(async ({ page }) => {
-  222 |     await page.goto(`${FE}/solar-wind`);
-  223 |   });
-  224 | 
 ```

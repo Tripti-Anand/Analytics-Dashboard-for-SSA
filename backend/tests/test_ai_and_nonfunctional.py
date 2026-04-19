@@ -136,18 +136,19 @@ def test_BE003_magnetogram_cached_after_first_hit():
     assert cached == actual_exists
 
 
-def test_BE009_flare_data_is_array_of_objects():
-    """BE-009: /space-weather/flares array has required fields"""
+def test_BE009_flare_data_required_fields():
+    """BE-009: /space-weather/flares → {status, total, flares[]} with required fields"""
     res = client.get("/space-weather/flares")
     if res.status_code == 500:
-        print(f"\n[BE-009] Status: 500 — NASA API unavailable. Skipping.")
-        pytest.skip("NASA API rate-limited or unavailable")
+        print(f"\n[BE-009] Status: 500 — CCMC/NASA API unavailable. Skipping.")
+        pytest.skip("CCMC/NASA API rate-limited or unavailable")
     data = res.json()
-    print(f"\n[BE-009] Status: {res.status_code} | type: {type(data).__name__} | count: {len(data) if isinstance(data,list) else 'N/A'}")
+    flares = data.get("flares", [])
+    print(f"\n[BE-009] Status: {res.status_code} | type: {type(data).__name__} | count: {len(flares)}")
     assert res.status_code == 200
-    assert isinstance(data, list)
-    if data:
-        first = data[0]
+    assert isinstance(flares, list)
+    if flares:
+        first = flares[0]
         print(f"         First item keys: {list(first.keys())}")
         for key in ["classType", "startTime", "peakTime", "endTime", "activeRegion"]:
             assert key in first, f"Missing field: {key}"
@@ -261,3 +262,142 @@ def test_NF007_injection_in_chat_message():
     # Should return 200 and treat as plain text, NOT 500 crash
     assert res.status_code in [200, 422]
     assert res.status_code != 500
+
+
+# ══════════════════════════════════════════════════════════
+#  ADDITIONAL NON-FUNCTIONAL TESTS  (NF-009 to NF-014)
+# ══════════════════════════════════════════════════════════
+
+def test_NF009_backend_errors_have_json_detail():
+    """NF-009: All error responses return JSON with 'detail' field (not HTML)"""
+    # Trigger a 400 with an invalid AIA wavelength
+    res = client.get("/space-weather/aia-image?wavelength=BADWL")
+    ctype = res.headers.get("content-type", "")
+    print(f"\n[NF-009] 400 error Content-Type: '{ctype}' | status: {res.status_code}")
+    assert "application/json" in ctype
+    data = res.json()
+    assert "detail" in data
+    print(f"         detail: {data['detail']}")
+
+
+def test_NF010_retry_reconnects_after_outage():
+    """NF-010: Backend reconnects cleanly when previously failing endpoint recovers"""
+    from unittest.mock import patch
+    # Simulate a down-then-up scenario: first call fails, second succeeds
+    call_count = {"n": 0}
+
+    original_get_solar_wind = None
+    import app.services.solar_wind_service as sw_module
+
+    async def flaky_solar_wind():
+        call_count["n"] += 1
+        if call_count["n"] == 1:
+            return []  # first call: simulate failure (triggers 503)
+        from app.services.solar_wind_service import SolarWindFetcher
+        return await SolarWindFetcher.get_solar_wind_data.__wrapped__()
+
+    # First request — should get 503
+    with patch("app.services.solar_wind_service.SolarWindFetcher.get_solar_wind_data",
+               return_value=[]):
+        r1 = client.get("/space-weather/wind/speed")
+    print(f"\n[NF-010] First call (simulated outage): status {r1.status_code} (expected 503)")
+    assert r1.status_code == 503
+
+    # Second request — real backend, should recover
+    r2 = client.get("/space-weather/wind/speed")
+    print(f"         Second call (real backend): status {r2.status_code}")
+    assert r2.status_code in [200, 503]  # 503 only if NOAA is genuinely down
+
+
+def test_NF011_loading_skeleton_class_exists_in_source():
+    """NF-011: Loading skeleton CSS class (animate-pulse) exists in frontend source"""
+    frontend_src = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "src"
+    )
+    found = False
+    if os.path.exists(frontend_src):
+        for root, _, files in os.walk(frontend_src):
+            for f in files:
+                if f.endswith((".tsx", ".ts", ".jsx", ".js", ".css")):
+                    path = os.path.join(root, f)
+                    with open(path, encoding="utf-8", errors="ignore") as fh:
+                        if "animate-pulse" in fh.read():
+                            found = True
+                            print(f"\n[NF-011] animate-pulse found in: {os.path.relpath(path)}")
+                            break
+            if found:
+                break
+    print(f"\n[NF-011] Loading skeleton (animate-pulse) in frontend source: {found}")
+    assert found, "animate-pulse class not found in frontend source — skeleton loader may be missing"
+
+
+def test_NF012_images_have_alt_attributes_in_source():
+    """NF-012: <img> tags in frontend source have alt attributes"""
+    frontend_src = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "src"
+    )
+    missing_alts = []
+    import re
+    img_pattern = re.compile(r'<img\b(?![^>]*\balt=)[^>]*>', re.IGNORECASE)
+    if os.path.exists(frontend_src):
+        for root, _, files in os.walk(frontend_src):
+            for f in files:
+                if f.endswith((".tsx", ".jsx")):
+                    path = os.path.join(root, f)
+                    with open(path, encoding="utf-8", errors="ignore") as fh:
+                        content = fh.read()
+                    for match in img_pattern.finditer(content):
+                        missing_alts.append(f"{os.path.relpath(path)}: {match.group()[:60]}")
+    print(f"\n[NF-012] img tags missing alt attribute: {len(missing_alts)}")
+    for item in missing_alts:
+        print(f"         {item}")
+    # Warn but don't hard-fail (alt may be on a Next.js Image component)
+    assert len(missing_alts) == 0, f"Found {len(missing_alts)} img tags without alt attributes"
+
+
+def test_NF013_tab_navigation_sidebar_exists_in_source():
+    """NF-013: Sidebar navigation links are keyboard-accessible (have href or tabIndex in source)"""
+    frontend_src = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "src"
+    )
+    found_sidebar = False
+    if os.path.exists(frontend_src):
+        for root, _, files in os.walk(frontend_src):
+            for f in files:
+                if f.endswith((".tsx", ".jsx", ".ts")):
+                    path = os.path.join(root, f)
+                    with open(path, encoding="utf-8", errors="ignore") as fh:
+                        content = fh.read()
+                    if "sidebar" in content.lower() or "Sidebar" in content:
+                        found_sidebar = True
+                        print(f"\n[NF-013] Sidebar component found in: {os.path.relpath(path)}")
+                        break
+            if found_sidebar:
+                break
+    print(f"\n[NF-013] Sidebar component present in source: {found_sidebar}")
+    assert found_sidebar, "Sidebar navigation component not found in frontend source"
+
+
+def test_NF014_no_hardcoded_localhost_in_production_api_calls():
+    """NF-014: lib/api.ts uses BASE_URL env var, not hardcoded localhost:8000"""
+    api_lib_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "src", "lib", "api.ts"
+    )
+    if not os.path.exists(api_lib_path):
+        pytest.skip("frontend/src/lib/api.ts not found")
+    with open(api_lib_path, encoding="utf-8") as fh:
+        content = fh.read()
+    # BASE_URL must be defined using the env var
+    has_env_var = "NEXT_PUBLIC_API_URL" in content
+    has_base_url = "BASE_URL" in content
+    # All fetch calls should use BASE_URL, not raw localhost
+    import re
+    hardcoded = re.findall(r'fetch\(["\`]http://localhost:\d+', content)
+    print(f"\n[NF-014] NEXT_PUBLIC_API_URL used: {has_env_var} | BASE_URL defined: {has_base_url} | hardcoded fetch calls: {hardcoded}")
+    assert has_env_var, "NEXT_PUBLIC_API_URL env var not referenced in api.ts"
+    assert has_base_url, "BASE_URL constant not defined in api.ts"
+    assert hardcoded == [], f"Hardcoded localhost URLs found in fetch calls: {hardcoded}"

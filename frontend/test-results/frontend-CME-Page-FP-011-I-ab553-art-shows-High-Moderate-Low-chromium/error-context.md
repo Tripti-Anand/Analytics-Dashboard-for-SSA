@@ -12,14 +12,9 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded while running "beforeEach" hook.
-```
+Error: expect(received).toBeTruthy()
 
-```
-Error: page.goto: Test timeout of 30000ms exceeded.
-Call log:
-  - navigating to "http://localhost:3000/cme", waiting until "load"
-
+Received: false
 ```
 
 # Page snapshot
@@ -58,79 +53,47 @@ Call log:
       - generic [ref=e36]:
         - generic [ref=e37]: "01"
         - heading "CME Velocity" [level=2] [ref=e38]
-        - generic [ref=e39]:
+        - generic [ref=e40]:
           - paragraph [ref=e41]: Coronal Mass Ejections are massive eruptions of plasma and magnetic field from the Sun's corona.
-          - paragraph [ref=e43]: No speed data
-      - generic [ref=e48]:
-        - generic [ref=e49]: "02"
-        - heading "Magnetic Structure" [level=2] [ref=e50]
-        - generic [ref=e51]:
-          - paragraph [ref=e53]: The magnetic structure determines how the CME interacts with Earth's magnetosphere.
-          - paragraph [ref=e55]: Loading...
-      - generic [ref=e60]:
-        - generic [ref=e61]: "03"
-        - heading "Impact Probability" [level=2] [ref=e62]
-        - generic [ref=e63]:
-          - paragraph [ref=e65]: Impact probability depends on CME trajectory, angular width, and speed relative to the Sun-Earth line.
-          - paragraph [ref=e67]: Loading...
-      - generic [ref=e72]:
-        - generic [ref=e73]: "04"
-        - heading "CME Coronagraph Image" [level=2] [ref=e74]
-        - generic [ref=e75]:
-          - paragraph [ref=e77]: LASCO coronagraph blocks the bright solar disk to reveal faint coronal structures and CMEs propagating outward.
-          - img "LASCO CME Coronagraph" [ref=e79]
-      - generic [ref=e84]:
-        - generic [ref=e85]: "05"
-        - heading "CME Event Log" [level=2] [ref=e86]
-        - generic [ref=e87]:
-          - generic [ref=e88]:
-            - generic [ref=e89]: ID
-            - generic [ref=e90]: Time
-            - generic [ref=e91]: Speed
-            - generic [ref=e92]: Type
-            - generic [ref=e93]: Location
-            - generic [ref=e94]: Risk
-          - paragraph [ref=e96]: Loading CME events...
-  - generic [ref=e102] [cursor=pointer]:
-    - button "Open Next.js Dev Tools" [ref=e103]:
-      - img [ref=e104]
-    - generic [ref=e107]:
-      - button "Open issues overlay" [ref=e108]:
-        - generic [ref=e109]:
-          - generic [ref=e110]: "0"
-          - generic [ref=e111]: "1"
-        - generic [ref=e112]: Issue
-      - button "Collapse issues badge" [ref=e113]:
-        - img [ref=e114]
-  - alert [ref=e116]
+          - paragraph [ref=e42]: Loading CME data...
+      - generic [ref=e47]:
+        - generic [ref=e48]: "02"
+        - heading "Magnetic Structure" [level=2] [ref=e49]
+        - generic [ref=e50]:
+          - paragraph [ref=e52]: The magnetic structure determines how the CME interacts with Earth's magnetosphere.
+          - paragraph [ref=e54]: Loading...
+      - generic [ref=e59]:
+        - generic [ref=e60]: "03"
+        - heading "Impact Probability" [level=2] [ref=e61]
+        - generic [ref=e62]:
+          - paragraph [ref=e64]: Impact probability depends on CME trajectory, angular width, and speed relative to the Sun-Earth line.
+          - paragraph [ref=e66]: Loading...
+      - generic [ref=e71]:
+        - generic [ref=e72]: "04"
+        - heading "CME Coronagraph Image" [level=2] [ref=e73]
+        - generic [ref=e74]:
+          - paragraph [ref=e76]: LASCO coronagraph blocks the bright solar disk to reveal faint coronal structures and CMEs propagating outward.
+          - img "LASCO CME Coronagraph" [ref=e78]
+      - generic [ref=e83]:
+        - generic [ref=e84]: "05"
+        - heading "CME Event Log" [level=2] [ref=e85]
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - generic [ref=e88]: ID
+            - generic [ref=e89]: Time
+            - generic [ref=e90]: Speed
+            - generic [ref=e91]: Type
+            - generic [ref=e92]: Location
+            - generic [ref=e93]: Risk
+          - paragraph [ref=e95]: Loading CME events...
+  - button "Open Next.js Dev Tools" [ref=e102] [cursor=pointer]:
+    - img [ref=e103]
+  - alert [ref=e106]
 ```
 
 # Test source
 
 ```ts
-  18  | // ═══════════════════════════════════════════════════════════════════════════════
-  19  | 
-  20  | test.describe("Home Page", () => {
-  21  |   test("FP-001: Home page renders STELAR hero text", async ({ page }) => {
-  22  |     await page.goto(FE);
-  23  |     const heading = page.locator("h1");
-  24  |     await expect(heading).toContainText("STELAR");
-  25  |     console.log(`[FP-001] h1 text: "${await heading.textContent()}"`);
-  26  |   });
-  27  | 
-  28  |   test("FP-002: Starfield canvas background renders", async ({ page }) => {
-  29  |     await page.goto(FE);
-  30  |     const canvas = page.locator("canvas");
-  31  |     const count = await canvas.count();
-  32  |     console.log(`[FP-002] Canvas elements found: ${count}`);
-  33  |     expect(count).toBeGreaterThan(0);
-  34  |   });
-  35  | 
-  36  |   test("FP-003: Navbar / nav links visible", async ({ page }) => {
-  37  |     await page.goto(FE);
-  38  |     const nav = page.locator("nav, header");
-  39  |     await expect(nav.first()).toBeVisible();
-  40  |     console.log(`[FP-003] Nav element visible: true`);
   41  |   });
   42  | });
   43  | 
@@ -208,8 +171,7 @@ Call log:
   115 | 
   116 | test.describe("CME Page", () => {
   117 |   test.beforeEach(async ({ page }) => {
-> 118 |     await page.goto(`${FE}/cme`);
-      |                ^ Error: page.goto: Test timeout of 30000ms exceeded.
+  118 |     await page.goto(`${FE}/cme`);
   119 |     await page.waitForTimeout(2000);
   120 |   });
   121 | 
@@ -232,7 +194,8 @@ Call log:
   138 |     const high = page.getByText("High").first();
   139 |     const low  = page.getByText("Low").first();
   140 |     console.log(`[FP-011] High visible: ${await high.isVisible()} | Low visible: ${await low.isVisible()}`);
-  141 |     expect(await high.isVisible() || await low.isVisible()).toBeTruthy();
+> 141 |     expect(await high.isVisible() || await low.isVisible()).toBeTruthy();
+      |                                                             ^ Error: expect(received).toBeTruthy()
   142 |   });
   143 | 
   144 |   test("FP-012: CME Coronagraph image loads", async ({ page }) => {
@@ -310,4 +273,27 @@ Call log:
   216 | // ═══════════════════════════════════════════════════════════════════════════════
   217 | //  SOLAR WIND PAGE  (FP-018 to FP-020)
   218 | // ═══════════════════════════════════════════════════════════════════════════════
+  219 | 
+  220 | test.describe("Solar Wind Page", () => {
+  221 |   test.beforeEach(async ({ page }) => {
+  222 |     await page.goto(`${FE}/solar-wind`);
+  223 |   });
+  224 | 
+  225 |   test("FP-018: Solar Wind Speed card shows km/s unit", async ({ page }) => {
+  226 |     await waitForNoSkeleton(page);
+  227 |     const unit = page.getByText("km/s").first();
+  228 |     await expect(unit).toBeVisible({ timeout: 15000 });
+  229 |     const speedCard = page.getByText("Solar Wind Speed", { exact: false }).first();
+  230 |     console.log(`[FP-018] km/s visible: true | Solar Wind Speed card: ${await speedCard.isVisible()}`);
+  231 |   });
+  232 | 
+  233 |   test("FP-019: IMF Bz card visible with nT unit", async ({ page }) => {
+  234 |     await waitForNoSkeleton(page);
+  235 |     const nt = page.getByText("nT").first();
+  236 |     await expect(nt).toBeVisible({ timeout: 15000 });
+  237 |     const bzCard = page.getByText("Bz", { exact: false }).first();
+  238 |     console.log(`[FP-019] nT visible: true | Bz card: ${await bzCard.isVisible()}`);
+  239 |   });
+  240 | 
+  241 |   test("FP-020: Error banner shows Retry button when backend fails", async ({ page }) => {
 ```
