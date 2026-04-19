@@ -92,7 +92,8 @@ Analytics-Dashboard-for-SSA/
 | Backend | FastAPI, Python 3.12 |
 | Data Processing | SunPy, Astropy, NumPy, Pandas |
 | HTTP Clients | httpx (async), requests |
-| Image Processing | Matplotlib, Pillow |
+| Machine Learning | PyTorch, Transformers, Unsloth, PEFT |
+| Image Processing | Matplotlib, Pillow, OpenCV |
 
 ---
 
@@ -385,7 +386,7 @@ Single source of truth for all API calls from the frontend. All fetch functions 
 | Particle Flux | Proton + electron flux chart |
 | Energy Spectrum | Energy distribution description |
 | Radiation Mode | Mode selector — Crew / Satellite / Deep Space |
-| Proton Flux Monitor | GOES proton flux image |
+| Proton Flux Monitor | Dual-axis GOES interactive Plotly chart |
 
 ### Solar Wind (`/solar-wind`)
 | Card | Content |
@@ -393,7 +394,7 @@ Single source of truth for all API calls from the frontend. All fetch functions 
 | Solar Wind Speed | Speed, density, temperature data |
 | Plasma Density | Plasma concentration chart |
 | Interplanetary Magnetic Field | IMF Bx, By, Bz components chart |
-| Solar Wind Visualization | NOAA solar wind speed image |
+| Solar Wind Visualization | Real-time dual-axis Plotly chart |
 
 ---
 

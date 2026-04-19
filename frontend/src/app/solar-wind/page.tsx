@@ -140,7 +140,7 @@ export default function SolarWindPage() {
   return (
     <>
       {/* Hero */}
-      <section className="h-[110vh] flex flex-col items-center justify-center text-center gap-6">
+      <section className="min-h-screen h-[110vh] flex flex-col items-center justify-center text-center gap-6 pt-20">
         <h1 className="text-7xl font-black uppercase">Solar Wind</h1>
         <p className="text-gray-400 text-lg max-w-xl">
           Real-time plasma and interplanetary magnetic field data from NOAA SWPC

@@ -26,11 +26,11 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+    <nav className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 max-w-[95vw] overflow-x-auto px-2 pb-4 scrollbar-none">
       <motion.div
         onMouseMove={(e) => mouseX.set(e.pageX)}
         onMouseLeave={() => mouseX.set(Infinity)}
-        className="flex items-center gap-3 px-4 py-3 rounded-full border border-white/10 bg-black/20 backdrop-blur-md shadow-2xl"
+        className="flex items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-[2rem] border border-white/10 bg-black/20 backdrop-blur-md shadow-2xl min-w-max"
       >
         {NAV_ITEMS.map((item) => (
           <NavItem
@@ -64,20 +64,14 @@ function NavItem({
     return val - (bounds.x + bounds.width / 2);
   });
 
-  const width = useSpring(
-    useTransform(distance, [-150, 0, 150], [80, 120, 80]),
+  const hoverPhase = useSpring(
+    useTransform(distance, [-150, 0, 150], [0, 1, 0]),
     { mass: 0.1, stiffness: 150, damping: 12 }
   );
 
-  const height = useSpring(
-    useTransform(distance, [-150, 0, 150], [42, 50, 42]),
-    { mass: 0.1, stiffness: 150, damping: 12 }
-  );
-
-  const fontSize = useSpring(
-    useTransform(distance, [-150, 0, 150], [13, 18, 13]),
-    { mass: 0.1, stiffness: 150, damping: 12 }
-  );
+  const width = useTransform(hoverPhase, [0, 1], ["5rem", "7.5rem"]);
+  const height = useTransform(hoverPhase, [0, 1], ["2.625rem", "3.125rem"]);
+  const fontSize = useTransform(hoverPhase, [0, 1], ["0.8125rem", "1.125rem"]);
 
   return (
     <Link href={href}>

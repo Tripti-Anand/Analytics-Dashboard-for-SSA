@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { getGoesXrayFlux } from "@/lib/api";
+import { getAllSolarWindData } from "@/lib/api";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -10,18 +10,16 @@ const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-export default function GOESFluxChart() {
-  const [primary, setPrimary] = useState<any[]>([]);
-  const [secondary, setSecondary] = useState<any[]>([]);
+export default function SolarWindChart() {
+  const [solarWind, setSolarWind] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [containerWidth, setContainerWidth] = useState<number>(700);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    getGoesXrayFlux()
+    getAllSolarWindData()
       .then((data) => {
-        setPrimary(data.primary ?? []);
-        setSecondary(data.secondary ?? []);
+        setSolarWind(data.solar_wind ?? []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -43,15 +41,14 @@ export default function GOESFluxChart() {
   }, []);
 
   const isSmall = containerWidth < 500;
-  const isTiny  = containerWidth < 340;
-
-  // On high-res monitors, scaler triggers > 1.
+  
+  // High-res scalar
   const scale = containerWidth > 700 ? containerWidth / 700 : 1;
 
   if (loading)
-    return <div className="text-white/40 text-sm">Loading GOES X-Ray Data...</div>;
-  if (!primary.length && !secondary.length)
-    return <div className="text-white/40 text-sm">No flux data available.</div>;
+    return <div className="text-white/40 text-sm h-full flex items-center justify-center">Loading Solar Wind Data...</div>;
+  if (!solarWind.length)
+    return <div className="text-white/40 text-sm h-full flex items-center justify-center">No solar wind data available.</div>;
 
   return (
     <div ref={containerRef} className="w-full h-80 lg:h-96 min-h-[300px]">
@@ -59,20 +56,22 @@ export default function GOESFluxChart() {
         key={`plotly-scale-${Math.round(scale * 10)}`}
         data={[
           {
-            x: primary.map((d) => d.time_tag),
-            y: primary.map((d) => d.flux),
+            x: solarWind.map((d) => d.time_tag),
+            y: solarWind.map((d) => d.speed),
             type: "scatter",
             mode: "lines",
-            name: isTiny ? "P" : isSmall ? "Primary" : "Primary",
-            line: { color: "#ff4500", width: 1.5 * scale },
+            name: "Speed (km/s)",
+            line: { color: "#00E5FF", width: 1.5 * scale },
+            yaxis: "y",
           },
           {
-            x: secondary.map((d) => d.time_tag),
-            y: secondary.map((d) => d.flux),
+            x: solarWind.map((d) => d.time_tag),
+            y: solarWind.map((d) => d.density),
             type: "scatter",
             mode: "lines",
-            name: isTiny ? "S" : isSmall ? "Secondary" : "Secondary",
-            line: { color: "#00bfff", width: 1.5 * scale, dash: "dot" },
+            name: "Density (p/cm³)",
+            line: { color: "#B388FF", width: 1.5 * scale },
+            yaxis: "y2",
           },
         ]}
         layout={{
@@ -81,7 +80,7 @@ export default function GOESFluxChart() {
           autosize: true,
 
           title: {
-            text: isSmall ? "GOES X-Ray Flux" : "GOES X-Ray Flux (0.1–0.8 nm)",
+            text: "Solar Wind Speed & Density",
             font: { color: "#fff", size: (isSmall ? 11 : 13) * scale },
             pad: { t: 4 },
           },
@@ -97,13 +96,20 @@ export default function GOESFluxChart() {
           },
 
           yaxis: {
-            title: isSmall ? undefined : { text: "Flux (W/m²)", font: { size: 11 * scale } },
-            type: "log",
-            color: "#aaa",
+            title: isSmall ? undefined : { text: "Speed (km/s)", font: { size: 11 * scale } },
+            color: "#00E5FF",
             showgrid: true,
             gridcolor: "#ffffff15",
             tickfont: { size: (isSmall ? 8 : 10) * scale },
-            tickformat: isSmall ? ".2s" : undefined,
+          },
+
+          yaxis2: {
+            title: isSmall ? undefined : { text: "Density (p/cm³)", font: { size: 11 * scale } },
+            color: "#B388FF",
+            overlaying: "y",
+            side: "right",
+            showgrid: false,
+            tickfont: { size: (isSmall ? 8 : 10) * scale },
           },
 
           legend: {
@@ -117,8 +123,8 @@ export default function GOESFluxChart() {
           },
 
           margin: isSmall
-            ? { t: 36, l: 42, r: 8,  b: 60 }
-            : { t: 40 * scale, l: 60 * scale, r: 20 * scale, b: 70 * scale },
+            ? { t: 36, l: 42, r: 42, b: 60 }
+            : { t: 40 * scale, l: 60 * scale, r: 60 * scale, b: 70 * scale },
 
           font: { family: "Arial", size: 11 * scale, color: "#ccc" },
         }}

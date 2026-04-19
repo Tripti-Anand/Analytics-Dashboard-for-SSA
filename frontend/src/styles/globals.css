@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (min-width: 1920px) {
+  html, :root {
+    /* 100vw / 120 ensures that at 1920px, 1rem = 16px. At 5120px, it perfectly inflates up proportionally to ~42px */
+    font-size: 0.833333vw !important;
+  }
+}
+
 html,
 body {
   background-color: black;

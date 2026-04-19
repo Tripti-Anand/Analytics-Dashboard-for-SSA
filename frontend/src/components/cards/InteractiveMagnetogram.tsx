@@ -21,7 +21,23 @@ export default function InteractiveMagnetogram() {
   const [clicked, setClicked] = useState<Region | null>(null)
   const [loading, setLoading] = useState(true)
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
-  const [displaySize] = useState({ w: 280, h: 280 })
+  const [scale, setScale] = useState(1);
+  const baseSize = 280;
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1920) {
+        setScale(window.innerWidth / 1920);
+      } else {
+        setScale(1);
+      }
+    };
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const displaySize = { w: baseSize * scale, h: baseSize * scale };
 
   useEffect(() => {
     fetch(`${BASE_URL}/space-weather/magnetogram/regions`)
@@ -31,7 +47,7 @@ export default function InteractiveMagnetogram() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Scale bbox from data coords (512x512) to display size (280x280)
+  // Scale bbox from data coords (512x512) to display size
   function scaleBbox(bbox: [number, number, number, number]) {
     const [x1, y1, x2, y2] = bbox
     const scaleX = displaySize.w / 512
@@ -98,11 +114,11 @@ export default function InteractiveMagnetogram() {
               {flareClasses.map((cls) => {
                 const val = clicked.flare[cls] ?? 0
                 const color =
-                  cls === "X" ? { bar: "bg-red-400",    text: "text-red-400" } :
-                  cls === "M" ? { bar: "bg-orange-400", text: "text-orange-400" } :
-                  cls === "C" ? { bar: "bg-yellow-400", text: "text-yellow-400" } :
-                  cls === "B" ? { bar: "bg-green-400",  text: "text-green-400" } :
-                                { bar: "bg-blue-400",   text: "text-blue-400" }
+                  cls === "X" ? { bar: "bg-red-400", text: "text-red-400" } :
+                    cls === "M" ? { bar: "bg-orange-400", text: "text-orange-400" } :
+                      cls === "C" ? { bar: "bg-yellow-400", text: "text-yellow-400" } :
+                        cls === "B" ? { bar: "bg-green-400", text: "text-green-400" } :
+                          { bar: "bg-blue-400", text: "text-blue-400" }
                 return (
                   <div key={cls} className="flex items-center gap-3">
                     <span className={`text-sm font-bold w-4 ${color.text}`}>{cls}</span>
@@ -167,9 +183,9 @@ export default function InteractiveMagnetogram() {
               >
                 <span style={{
                   position: "absolute",
-                  top: -14,
+                  top: -14 * scale,
                   left: 0,
-                  fontSize: "9px",
+                  fontSize: `${9 * scale}px`,
                   fontFamily: "monospace",
                   fontWeight: "bold",
                   color: isSelected ? "rgba(255,100,0,1)" : "rgba(255,200,0,1)",

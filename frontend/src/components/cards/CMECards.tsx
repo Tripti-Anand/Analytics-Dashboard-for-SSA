@@ -37,7 +37,7 @@ export function CMEVelocityContent() {
   const { latest, loading } = useCMEData()
 
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6">
       <div className="flex flex-col justify-center space-y-4">
         <p className="text-lg text-zinc-300 leading-relaxed">
           Coronal Mass Ejections are massive eruptions of plasma and magnetic
@@ -80,7 +80,7 @@ export function CMEMagneticContent() {
   const { latest, loading } = useCMEData()
 
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6">
       <div className="flex flex-col justify-center space-y-4">
         <p className="text-lg text-zinc-300 leading-relaxed">
           The magnetic structure determines how the CME interacts with Earth's
@@ -141,7 +141,7 @@ export function CMEImpactContent() {
   const latest = events[events.length - 1]
 
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6">
       <div className="flex flex-col justify-center space-y-4">
         <p className="text-lg text-zinc-300 leading-relaxed">
           Impact probability depends on CME trajectory, angular width, and
@@ -205,10 +205,10 @@ export function CMEImpactContent() {
 // ─── Card 04: Coronagraph Image ───────────────────────────────────────────────
 export function CMEImageContent() {
   return (
-    <div className="flex items-center justify-between gap-12 w-full h-full">
+    <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 w-full h-full min-h-0 mt-4 lg:mt-0">
 
       {/* LEFT */}
-      <div className="flex flex-col justify-center max-w-xl space-y-4">
+      <div className="flex flex-col justify-center max-w-xl space-y-4 w-full">
         <p className="text-lg text-zinc-300 leading-relaxed">
           LASCO coronagraph blocks the bright solar disk to reveal faint
           coronal structures and CMEs propagating outward.
@@ -216,13 +216,13 @@ export function CMEImageContent() {
       </div>
 
       {/* RIGHT */}
-      <div className="flex items-center justify-center flex-1 -mt-14">
-  <img
-    src={getCMEImageUrl()}
-    alt="LASCO CME Coronagraph"
-    className="w-[290px] h-[290px] object-cover rounded-2xl shadow-2xl"
-  />
-</div>
+      <div className="flex items-center justify-center w-full h-full min-h-0 py-4">
+        <img
+          src="https://soho.nascom.nasa.gov/data/LATEST/current_c2.gif"
+          alt="LASCO CME Coronagraph"
+          className="h-full max-h-[350px] w-auto max-w-[90%] lg:max-w-full aspect-square object-contain rounded-xl shadow-2xl"
+        />
+      </div>
 
     </div>
   )
@@ -235,7 +235,9 @@ export function CMEImageContent() {
     return (
       <div className="w-full h-full mt-6 flex flex-col overflow-hidden">
 
-        {/* header row */}
+        {/* header row - hidden on mobile if too small, or let it scroll horizontally */}
+        <div className="w-full overflow-x-auto custom-scroll -mx-2 px-2">
+          <div className="min-w-[500px]">
         <div className="grid grid-cols-6 gap-2 px-3 pb-2 border-b border-white/10">
           <span className="text-white/40 text-xs uppercase tracking-widest">ID</span>
           <span className="text-white/40 text-xs uppercase tracking-widest">Time</span>
@@ -309,6 +311,7 @@ export function CMEImageContent() {
               </span>
             </div>
           ))}
+          </div></div>
         </div>
 
       </div>

@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import Starfield from "@/components/canvas/Starfield";
 import Navbar from "@/components/layout/Navbar";
-import { ServiceCards } from "@/components/home/ServiceCards";
+import ServiceCards from "@/components/home/ServiceCards";
 
 export const metadata = {
   title: "STELAR",

@@ -3,3 +3,8 @@ node_modules/
 venv/
 backend/app/assets/cme/
 *.env
+
+__pycache__/
+*.pyc
+backend/assets/flare/magnetogram/*.fits
+backend/assets/flare/magnetogram/*.png

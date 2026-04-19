@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { getGoesXrayFlux } from "@/lib/api";
+import { getAllSEPData } from "@/lib/api";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -10,18 +10,16 @@ const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-export default function GOESFluxChart() {
-  const [primary, setPrimary] = useState<any[]>([]);
-  const [secondary, setSecondary] = useState<any[]>([]);
+export default function ProtonFluxChart() {
+  const [protonData, setProtonData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [containerWidth, setContainerWidth] = useState<number>(700);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    getGoesXrayFlux()
+    getAllSEPData()
       .then((data) => {
-        setPrimary(data.primary ?? []);
-        setSecondary(data.secondary ?? []);
+        setProtonData(data.particle_flux?.proton ?? []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -43,45 +41,43 @@ export default function GOESFluxChart() {
   }, []);
 
   const isSmall = containerWidth < 500;
-  const isTiny  = containerWidth < 340;
-
-  // On high-res monitors, scaler triggers > 1.
   const scale = containerWidth > 700 ? containerWidth / 700 : 1;
 
   if (loading)
-    return <div className="text-white/40 text-sm">Loading GOES X-Ray Data...</div>;
-  if (!primary.length && !secondary.length)
-    return <div className="text-white/40 text-sm">No flux data available.</div>;
+    return <div className="text-white/40 text-sm h-full flex items-center justify-center">Loading Proton Flux Data...</div>;
+  if (!protonData.length)
+    return <div className="text-white/40 text-sm h-full flex items-center justify-center">No proton flux data available.</div>;
+
+  // Group data by energy band
+  const energies = Array.from(new Set(protonData.map((d) => d.energy)));
+  
+  // Create a visually distinct color palette for different bands
+  const colors = ["#FF5252", "#FFAB40", "#69F0AE", "#448AFF", "#E040FB"];
+
+  const traces = energies.map((energy, idx) => {
+    const pts = protonData.filter((d) => d.energy === energy);
+    return {
+      x: pts.map((d) => d.time_tag),
+      y: pts.map((d) => d.flux),
+      type: "scatter" as const,
+      mode: "lines" as const,
+      name: isSmall ? energy.replace("MeV", "").trim() : energy,
+      line: { color: colors[idx % colors.length], width: 1.5 * scale },
+    };
+  });
 
   return (
     <div ref={containerRef} className="w-full h-80 lg:h-96 min-h-[300px]">
       <Plot
         key={`plotly-scale-${Math.round(scale * 10)}`}
-        data={[
-          {
-            x: primary.map((d) => d.time_tag),
-            y: primary.map((d) => d.flux),
-            type: "scatter",
-            mode: "lines",
-            name: isTiny ? "P" : isSmall ? "Primary" : "Primary",
-            line: { color: "#ff4500", width: 1.5 * scale },
-          },
-          {
-            x: secondary.map((d) => d.time_tag),
-            y: secondary.map((d) => d.flux),
-            type: "scatter",
-            mode: "lines",
-            name: isTiny ? "S" : isSmall ? "Secondary" : "Secondary",
-            line: { color: "#00bfff", width: 1.5 * scale, dash: "dot" },
-          },
-        ]}
+        data={traces}
         layout={{
           paper_bgcolor: "transparent",
           plot_bgcolor: "transparent",
           autosize: true,
 
           title: {
-            text: isSmall ? "GOES X-Ray Flux" : "GOES X-Ray Flux (0.1–0.8 nm)",
+            text: isSmall ? "Proton Flux" : "GOES Proton Flux",
             font: { color: "#fff", size: (isSmall ? 11 : 13) * scale },
             pad: { t: 4 },
           },
@@ -97,13 +93,13 @@ export default function GOESFluxChart() {
           },
 
           yaxis: {
-            title: isSmall ? undefined : { text: "Flux (W/m²)", font: { size: 11 * scale } },
+            title: isSmall ? undefined : { text: "Flux (pfu)", font: { size: 11 * scale } },
             type: "log",
             color: "#aaa",
             showgrid: true,
             gridcolor: "#ffffff15",
             tickfont: { size: (isSmall ? 8 : 10) * scale },
-            tickformat: isSmall ? ".2s" : undefined,
+            tickformat: isSmall ? ".1s" : undefined,
           },
 
           legend: {
