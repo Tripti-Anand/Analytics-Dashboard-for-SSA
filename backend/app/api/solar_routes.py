@@ -4,82 +4,77 @@ import httpx
 from fastapi.responses import StreamingResponse
 from app.services.solar_wind_service import SolarWindFetcher
 from dotenv import load_dotenv
+from fastapi.responses import Response
 
 load_dotenv()
-
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 router = APIRouter()
-
-NASA_API_KEY = "8ZMQhHDs5WkHqm761lOCn9x20SafyO52o3HDMbSR"
 
 
 @router.get("/flares")
 async def get_solar_flares():
     """
-    Returns solar flare events from NASA DONKI API.
+    Returns solar flare events from CCMC DONKI.
     """
-    if not NASA_API_KEY:
-        raise HTTPException(status_code=500, detail="NASA API key not configured")
-
-    url = f"https://api.nasa.gov/DONKI/FLR?api_key={NASA_API_KEY}"
+    url = "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR"
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10.0)
+            response = await client.get(url,params={"api_key": NASA_API_KEY}, timeout=10.0)
             response.raise_for_status()
             data = response.json()
 
         formatted = [
             {
-                "classType": flare.get("classType"),
+                "id": flare.get("flrID"),
+                "classType": flare.get("classType") or "Unknown",
                 "startTime": flare.get("beginTime"),
                 "peakTime": flare.get("peakTime"),
                 "endTime": flare.get("endTime"),
                 "activeRegion": flare.get("activeRegionNum"),
+                "sourceLocation": flare.get("sourceLocation"),
             }
-            for flare in data
+            for flare in data[-10:]  # last 10 events
         ]
-        return formatted
 
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code,
-            detail=f"NASA API error: {e.response.text}"
-        )
+        return {
+            "status": "success",
+            "total": len(formatted),
+            "flares": formatted
+        }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/aia-image")
 async def get_aia_image(wavelength: str = "0171"):
-    """
-    Streams the latest AIA solar image from SDO for a given wavelength.
-    """
-    VALID_WAVELENGTHS = {"0094", "0131", "0171", "0193", "0211", "0304", "0335", "1600", "1700"}
+
+    VALID_WAVELENGTHS = {"0094", "0131", "0171", "0193"}
 
     if wavelength not in VALID_WAVELENGTHS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid wavelength. Must be one of: {', '.join(sorted(VALID_WAVELENGTHS))}"
-        )
+        raise HTTPException(status_code=400, detail="Invalid wavelength")
 
-    url = f"https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_{wavelength}.jpg"
+    url = f"https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_{wavelength}.jpg"
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10.0)
-            response.raise_for_status()
-            return StreamingResponse(
-                response.aiter_bytes(),
-                media_type="image/jpeg"
-            )
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(
-            status_code=e.response.status_code,
-            detail=f"SDO image fetch error: {e.response.text}"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(10.0),
+            follow_redirects=True
+        ) as client:
+            response = await client.get(url)
 
+        response.raise_for_status()
+
+        return Response(
+            content=response.content,
+            media_type="image/jpeg",
+            headers={"Cache-Control": "public, max-age=120"}
+        )
+
+    except Exception as e:
+        print("AIA IMAGE ERROR:", repr(e))
+        raise HTTPException(status_code=502, detail=str(e))
 
 # Solar Wind Data Endpoints
 
