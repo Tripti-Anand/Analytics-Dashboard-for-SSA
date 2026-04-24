@@ -5,7 +5,7 @@ from urllib3.util.retry import Retry
 from dotenv import load_dotenv
 
 load_dotenv()
-
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 NASA_CME_URL = "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME"
 
 class CMEProcessor:
@@ -28,6 +28,7 @@ class CMEProcessor:
         try:
             response = session.get(
                 NASA_CME_URL,
+                params={"api_key": NASA_API_KEY},
                 timeout=10
             )
             response.raise_for_status()

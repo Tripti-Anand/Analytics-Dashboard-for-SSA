@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi.responses import Response
 
 load_dotenv()
-
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 router = APIRouter()
 
 
@@ -20,7 +20,7 @@ async def get_solar_flares():
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10.0)
+            response = await client.get(url,params={"api_key": NASA_API_KEY}, timeout=10.0)
             response.raise_for_status()
             data = response.json()
 
