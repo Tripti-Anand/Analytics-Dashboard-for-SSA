@@ -8,8 +8,9 @@ export async function POST(req: Request) {
       return new Response("Missing OPENAI_API_KEY", { status: 500 });
     }
 
-    const formData = await req.formData();
-    const message = formData.get("message") as string;
+    // ✅ use JSON instead of formData
+    const body = await req.json();
+    const message = body.message;
 
     if (!message) {
       return new Response("Message required", { status: 400 });
