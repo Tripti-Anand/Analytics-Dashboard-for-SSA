@@ -13,7 +13,16 @@ export async function POST(req: Request) {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/ai/chat", {
+    const base = process.env.BACKEND_URL;
+
+    if (!base) {
+      return NextResponse.json(
+        { error: "Missing BACKEND_URL" },
+        { status: 500 }
+      );
+    }
+
+    const res = await fetch(`${base}/ai/chat`, {
       method: "POST",
       body: formData,
     });
@@ -26,7 +35,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Forward everything — response + surya_data + source
     const data = await res.json();
     return NextResponse.json(data);
 
