@@ -45,7 +45,7 @@ export default function FlareEventLog() {
         // ✅ FIX: ensure it's always an array
         const flaresArray = Array.isArray(data)
           ? data
-          : data?.events || data?.data || []
+          : data?.flares || []
 
         // ✅ safe slicing
         setFlares(flaresArray.slice(-16).reverse())
