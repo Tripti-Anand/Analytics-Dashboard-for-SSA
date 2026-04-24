@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles  # ✅ ADD THIS
+from fastapi.staticfiles import StaticFiles
 
 from app.api.space_weather import router as space_weather_router
 from app.api.noaa import router as noaa_router
@@ -11,24 +11,32 @@ from app.api import solar_routes
 from app.api import ai_inference
 
 from dotenv import load_dotenv
+import os
+
 load_dotenv()
 
 app = FastAPI(title="SSA Backend")
 
-# ✅ ADD THIS (VERY IMPORTANT)
+# ✅ Static files (keep as-is)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-import os
+# =========================
+# ✅ FIXED CORS CONFIG
+# =========================
 
-# Allow frontend access
-frontend_url = os.getenv("FRONTEND_URL", "")
+frontend_url = os.getenv("FRONTEND_URL")
 
 origins = [
-    "http://localhost:3000",  # For local development
+    "http://localhost:3000",  # local dev
 ]
 
+# Add Vercel URL if provided
 if frontend_url:
     origins.append(frontend_url)
+
+# TEMP: allow all (to make sure everything works)
+# You can remove "*" later after confirming
+origins.append("*")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# =========================
 
 @app.get("/")
 def root():
