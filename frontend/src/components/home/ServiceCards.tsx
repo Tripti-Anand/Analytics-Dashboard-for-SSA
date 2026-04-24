@@ -6,6 +6,8 @@ import { useRef, useEffect, useState } from "react"
 import { ServiceCard } from "@/types/service-card"
 import { getGoesXrayFlux, getAIAImageUrl } from "@/lib/api"
 import GOESFluxChart from "@/components/cards/GOESFluxChart"
+import SolarWindChart from "@/components/cards/SolarWindChart"
+import ProtonFluxChart from "@/components/cards/ProtonFluxChart"
 import {
   CMEVelocityContent,
   CMEMagneticContent,
@@ -20,22 +22,16 @@ const InteractiveMagnetogram = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full h-full mt-6">
         <div className="flex flex-col justify-center space-y-4">
           <p className="text-zinc-300 text-base leading-relaxed">
             Magnetograms reveal solar magnetic field structures.
             Hover over the image to inspect field values.
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
-          <div style={{
-            width: "280px", height: "280px", borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.05)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0
-          }}>
-            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "14px" }}>Loading...</p>
+        <div className="flex items-center justify-center w-full h-full">
+          <div className="w-[18rem] h-[18rem] rounded-full border border-white/10 bg-white/5 flex items-center justify-center shrink-0">
+            <p className="text-white/30 text-sm">Loading...</p>
           </div>
         </div>
       </div>
@@ -84,7 +80,7 @@ function GoesFluxContent() {
   const flareClass = fluxValue ? getFlareClass(fluxValue) : null
 
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center w-full h-full mt-6 lg:mt-6 overflow-y-auto lg:overflow-visible">
       {/* LEFT: description + live class */}
       <div className="flex flex-col justify-center space-y-4">
         <p className="text-lg text-zinc-300 leading-relaxed">
@@ -105,7 +101,7 @@ function GoesFluxContent() {
       </div>
 
       {/* RIGHT: replace the static image with the live chart */}
-      <div className="flex items-start justify-center w-full -mt-12">
+      <div className="flex items-start justify-center w-full lg:-mt-12">
   <GOESFluxChart />
 </div>
     </div>
@@ -117,7 +113,7 @@ function AIAContent({ options }: { options: string[] }) {
   const [selected, setSelected] = useState(options[2]) // 171Å default
 
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6">
       {/* LEFT: description + wavelength buttons */}
       <div className="flex flex-col justify-center space-y-6">
         <p className="text-lg text-zinc-300 leading-relaxed">
@@ -141,16 +137,14 @@ function AIAContent({ options }: { options: string[] }) {
       </div>
 
       {/* RIGHT — now uses your backend as proxy */}
-      <div className="flex items-start justify-center w-full -mt-16">
-  <div className="scale-95">
-    <img
-      key={selected}
-      src={getAIAImageUrl(selected)}
-      alt={`AIA ${selected}`}
-      className="w-[290px] h-[290px] object-cover rounded-xl shadow-2xl"
-    />
-  </div>
-</div>
+      <div className="flex items-center justify-center w-full h-full min-h-0 lg:-mt-16 py-4">
+        <img
+          key={selected}
+          src={getAIAImageUrl(selected)}
+          alt={`AIA ${selected}`}
+          className="h-full max-h-[400px] w-auto max-w-[90%] lg:max-w-full aspect-square object-contain rounded-xl shadow-2xl"
+        />
+      </div>
     </div>
   )
 }
@@ -170,9 +164,33 @@ function CardContent({ card }: { card: ServiceCard }) {
   if (card.title === "CME Coronagraph Image") return <CMEImageContent />
   if (card.title === "CME Event Log") return <CMEEventLog />
 
+  // Solar Wind cards
+  if (card.title === "Solar Wind Visualization") return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6 overflow-y-auto lg:overflow-visible">
+      <div className="flex flex-col justify-center space-y-4">
+        <p className="text-lg text-zinc-300 leading-relaxed">{card.desc}</p>
+      </div>
+      <div className="flex items-start justify-center w-full lg:-mt-12">
+        <SolarWindChart />
+      </div>
+    </div>
+  )
+
+  // SEP cards
+  if (card.title === "Proton Flux Monitor") return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6 overflow-y-auto lg:overflow-visible">
+      <div className="flex flex-col justify-center space-y-4">
+        <p className="text-lg text-zinc-300 leading-relaxed">{card.desc}</p>
+      </div>
+      <div className="flex items-start justify-center w-full lg:-mt-12">
+        <ProtonFluxChart />
+      </div>
+    </div>
+  )
+
 // ─── DEFAULT FALLBACK ─────────────────────────────────────────────────────
   return (
-    <div className="grid grid-cols-2 gap-12 items-center w-full h-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full h-full mt-6 overflow-y-auto lg:overflow-visible">
 
       {/* LEFT: always show description */}
       <div className="flex flex-col justify-center space-y-4">
@@ -182,13 +200,13 @@ function CardContent({ card }: { card: ServiceCard }) {
       </div>
 
       {/* RIGHT: informational rows for solar wind cards, image if available */}
-      <div className="flex items-center justify-center w-full h-full">
+      <div className="flex items-center justify-center w-full lg:h-full">
 
         {card.type === "image" && card.imageSrc && (
           <img
             src={card.imageSrc}
             alt={card.title}
-            className="w-full max-w-[340px] rounded-2xl shadow-xl border border-white/10"
+            className="w-full max-w-md rounded-2xl shadow-xl border border-white/10"
           />
         )}
 
@@ -261,25 +279,25 @@ function Card({
   const scale = useTransform(progress, [start, end], [1, 0.9])
 
   return (
-    <div className="h-screen sticky top-0 flex items-center justify-center">
+    <div className="min-h-screen lg:h-screen sticky top-0 flex items-center justify-center pt-24 lg:pt-0 overflow-hidden">
       <motion.div
         style={{
           scale,
           zIndex: total - index,
         }}
         className={`
-          relative w-[82%] h-[65vh] rounded-[2.5rem]
-          border ${card.border} p-14 flex flex-col shadow-2xl
+          relative w-[90%] md:w-[85%] lg:w-[82%] h-[80vh] lg:h-[65vh] rounded-[2rem] lg:rounded-[2.5rem]
+          border ${card.border} p-6 md:p-10 lg:p-14 flex flex-col shadow-2xl
           bg-[#0a0a0f]
         `}
       >
         {/* gradient tint — reduce opacity to keep it subtle */}
-        <div className={`absolute inset-0 rounded-[2.5rem] bg-gradient-to-br ${card.color} opacity-40`} />
+        <div className={`absolute inset-0 rounded-[2rem] lg:rounded-[2.5rem] bg-gradient-to-br ${card.color} opacity-40`} />
 
         {/* content */}
-        <div className="relative z-10 flex flex-col h-full">
+        <div className="relative z-10 flex flex-col h-full overflow-y-auto custom-scroll pr-2 lg:pr-0 lg:overflow-visible">
           <span className="text-sm text-white/40 font-mono">{card.id}</span>
-          <h2 className="text-5xl font-black tracking-tight text-white">{card.title}</h2>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mt-1 md:mt-2">{card.title}</h2>
           <CardContent card={card} />
         </div>
 
