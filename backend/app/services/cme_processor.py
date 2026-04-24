@@ -5,9 +5,8 @@ from urllib3.util.retry import Retry
 from dotenv import load_dotenv
 
 load_dotenv()
-
-NASA_CME_URL = "https://api.nasa.gov/DONKI/CME"
-NASA_API_KEY = os.getenv("NASA_API_KEY", "8ZMQhHDs5WkHqm761lOCn9x20SafyO52o3HDMbSR")
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
+NASA_CME_URL = "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME"
 
 class CMEProcessor:
 
@@ -92,15 +91,34 @@ class CMEProcessor:
         except Exception as e:
             raise Exception(f"CME Image Error: {str(e)}")
 
-    def calculate_impact_probability(self, speed, longitude, cme_type):
-        score = 0
+    def calculate_impact_probability(self, speed, longitude, cme_type, latitude=None):
+        score = 0.0
+
+        # --- 1. Speed factor (normalized) ---
         if speed:
-            if speed > 1500: score += 3
-            elif speed > 800: score += 2
-            elif speed > 400: score += 1
+            # cap at 2000 km/s
+            speed_score = min(speed / 2000, 1.0)
+            score += speed_score * 0.4  # 40% weight
+
+        # --- 2. Longitude (Earth alignment) ---
         if longitude is not None:
-            if -30 <= longitude <= 30: score += 2
-        if cme_type and "halo" in cme_type.lower(): score += 3
-        if score >= 5: return "High"
-        elif score >= 3: return "Moderate"
-        else: return "Low"
+            # closer to 0 = more Earth-directed
+            alignment = max(0, 1 - abs(longitude) / 90)
+            score += alignment * 0.3  # 30% weight
+
+        # --- 3. Latitude (optional but useful) ---
+        if latitude is not None:
+            lat_alignment = max(0, 1 - abs(latitude) / 90)
+            score += lat_alignment * 0.1  # 10% weight
+
+        # --- 4. CME Type (halo boost) ---
+        if cme_type and "halo" in cme_type.lower():
+            score += 0.2  # 20% boost
+
+        # --- Final classification ---
+        if score >= 0.75:
+            return "High"
+        elif score >= 0.45:
+            return "Moderate"
+        else:
+            return "Low"
