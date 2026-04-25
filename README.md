@@ -1,4 +1,8 @@
 # Analytics Dashboard for SSA
+## 🌌 Stellar Dashboard  
+Interactive analytics platform  
+
+👉 **[Open Live App](https://ssa-analytic-dashboard.vercel.app/)**  
 ### Space Situational Awareness — Real-Time Solar Weather Dashboard
 
 A full-stack web application for monitoring real-time solar weather events including Solar Flares, Coronal Mass Ejections (CMEs), Solar Energetic Particles (SEPs), and Solar Wind conditions. Built with **Next.js + FastAPI**.
